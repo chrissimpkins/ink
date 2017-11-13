@@ -1,1 +1,1 @@
-# ink
+# ink [![Build Status](https://semaphoreci.com/api/v1/chrissimpkins/ink/branches/master/badge.svg)](https://semaphoreci.com/chrissimpkins/ink)
