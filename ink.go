@@ -11,13 +11,13 @@ import (
 )
 
 const (
-	// Application version string
+	// Version is the application version string
 	Version = "0.1.0"
 
-	// Application usage string
+	// Usage is the application usage string
 	Usage = "Usage: ink [args]"
 
-	// Application help string
+	// Help is the application help string
 	Help = "=================================================\n" +
 		" ink v" + Version + "\n" +
 		" Copyright 2017 Christopher Simpkins\n" +
