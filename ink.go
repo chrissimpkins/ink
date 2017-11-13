@@ -1,19 +1,24 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"text/template"
-	"bytes"
 )
 
 const (
+	// Application version string
 	Version = "0.1.0"
-	Usage   = "Usage: ink [args]"
-	Help    = "=================================================\n" +
+
+	// Application usage string
+	Usage = "Usage: ink [args]"
+
+	// Application help string
+	Help = "=================================================\n" +
 		" ink v" + Version + "\n" +
 		" Copyright 2017 Christopher Simpkins\n" +
 		" MIT License\n\n" +
@@ -113,7 +118,7 @@ func main() {
 			"{{.Nine}}",
 			*replaceString,
 		}
-		outPath := templatePath[0:len(templatePath)-3]
+		outPath := templatePath[0 : len(templatePath)-3]
 
 		buf := new(bytes.Buffer)
 		executeerr := t.Execute(buf, r)
@@ -123,7 +128,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		if *stdOutFlag{
+		if *stdOutFlag {
 			os.Stdout.WriteString(buf.String())
 		} else {
 			f, err := os.Create(outPath)
@@ -135,7 +140,6 @@ func main() {
 			f.WriteString(buf.String())
 			f.Sync()
 		}
-
 
 	}
 
@@ -160,4 +164,3 @@ func readFileToString(filepath string) string {
 
 	return string(byteString)
 }
-
