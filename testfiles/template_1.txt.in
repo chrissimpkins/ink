@@ -1,0 +1,4 @@
+This is a {{.One}}
+of some text for {{.Two}}
+and more text here is {{.Three}}
+here is a line for {{.Ink}}
