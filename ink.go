@@ -32,7 +32,28 @@ const (
 		" -v, --version        Application version\n\n"
 )
 
+var versionShort, versionLong, helpShort, helpLong, usageLong *bool
+var lintFlag, stdOutFlag *bool
+var replaceString *string
+
+func init() {
+	// define available command line flag arguments
+	versionShort = flag.Bool("v", false, "Application version")
+	versionLong = flag.Bool("version", false, "Application version")
+	helpShort = flag.Bool("h", false, "Help")
+	helpLong = flag.Bool("help", false, "Help")
+	usageLong = flag.Bool("usage", false, "Usage")
+
+	replaceString = flag.String("replace", "", "Optional string replacement")
+	lintFlag = flag.Bool("lint", false, "Lint the template file(s)")
+	stdOutFlag = flag.Bool("stdout", false, "Write to standard output stream")
+}
+
 func main() {
+
+	// parse command line flag arguments
+	flag.Parse()
+
 	// test for at least one argument on command line
 	if len(os.Args) < 2 {
 		os.Stderr.WriteString("[Error] Please include at least one argument for your Unicode code point search\n")
@@ -40,31 +61,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	// define available command line flags
-	var versionShort = flag.Bool("v", false, "Application version")
-	var versionLong = flag.Bool("version", false, "Application version")
-	var helpShort = flag.Bool("h", false, "Help")
-	var helpLong = flag.Bool("help", false, "Help")
-	var usageLong = flag.Bool("usage", false, "Usage")
-
-	var replaceString = flag.String("replace", "", "Optional string replacement")
-	var lintFlag = flag.Bool("lint", false, "Lint the template file(s)")
-	var stdOutFlag = flag.Bool("stdout", false, "Write to standard output stream")
-
-	flag.Parse()
-
 	// parse help, version, usage command line flags and handle them
 	switch {
-	case *versionShort:
+	case *versionShort, *versionLong:
 		os.Stdout.WriteString("uni v" + Version + "\n")
 		os.Exit(0)
-	case *versionLong:
-		os.Stdout.WriteString("uni v" + Version + "\n")
-		os.Exit(0)
-	case *helpShort:
-		os.Stdout.WriteString(Help)
-		os.Exit(0)
-	case *helpLong:
+	case *helpShort, *helpLong:
 		os.Stdout.WriteString(Help)
 		os.Exit(0)
 	case *usageLong:
