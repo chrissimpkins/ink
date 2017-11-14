@@ -1,6 +1,5 @@
 package main
 
-
 const (
 	// Version is the application version string
 	Version = "0.1.0"

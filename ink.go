@@ -10,7 +10,7 @@ import (
 	"text/template"
 )
 
-
+// ReplacementStrings is a struct that maintains the strings for text replacements
 type ReplacementStrings struct {
 	One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten string
 	Ink                                                       string
