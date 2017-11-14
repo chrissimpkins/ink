@@ -10,27 +10,11 @@ import (
 	"text/template"
 )
 
-const (
-	// Version is the application version string
-	Version = "0.1.0"
 
-	// Usage is the application usage string
-	Usage = "Usage: ink [args]"
-
-	// Help is the application help string
-	Help = "=================================================\n" +
-		" ink v" + Version + "\n" +
-		" Copyright 2017 Christopher Simpkins\n" +
-		" MIT License\n\n" +
-		" Source: https://github.com/chrissimpkins/ink\n" +
-		"=================================================\n\n" +
-		" Usage:\n" +
-		"  $ ink [args]\n\n" +
-		" Options:\n" +
-		" -h, --help           Application help\n" +
-		"     --usage          Application usage\n" +
-		" -v, --version        Application version\n\n"
-)
+type ReplacementStrings struct {
+	One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten string
+	Ink                                                       string
+}
 
 var versionShort, versionLong, helpShort, helpLong, usageLong *bool
 var lintFlag, stdOutFlag *bool
@@ -74,24 +58,21 @@ func main() {
 		os.Exit(0)
 	}
 
-	// # TODO: add template file path check for `.in` extension
-
-	type ReplacementString struct {
-		One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten string
-		Ink                                                       string
-	}
+	// TODO: add file path checks
+	// TODO: add template file path check for `.in` extension
+	// TODO: improve user messages for fails, successes
 
 	templatePath := os.Args[len(os.Args)-1]
 
 	// LINT: lint the template files
 	if *lintFlag {
 		// Create a new template and parse the letter into it.
-		success, response := lintTemplateSuccess(templatePath)
+		success := lintTemplateSuccess(templatePath)
 		if success {
-			fmt.Printf("%s\n", response)
+			fmt.Println("Linting was successful")
 			os.Exit(0)
 		} else {
-			os.Stderr.WriteString(response)
+			os.Stderr.WriteString("Linting failed")
 			os.Exit(1)
 		}
 
@@ -107,7 +88,7 @@ func main() {
 			os.Stderr.WriteString("[ink] ERROR: ink template could not be parsed. " + fmt.Sprintf("%v", err))
 			os.Exit(1)
 		}
-		r := ReplacementString{
+		r := ReplacementStrings{
 			*replaceString,
 			"{{.One}}",
 			"{{.Two}}",
@@ -147,14 +128,14 @@ func main() {
 
 }
 
-func lintTemplateSuccess(filePath string) (bool, string) {
+func lintTemplateSuccess(filePath string) bool {
 	templateText := readFileToString(filePath)
 	_, err := template.New("ink").Parse(templateText)
 	if err != nil {
-		return false, fmt.Sprintf("[ink] LINT ERROR \nFile: '%s' \nError: %v\n", filePath, err)
+		return false
 	}
 
-	return true, fmt.Sprintf("[ink] LINT \nFile: '%s': no template errors\n", filePath)
+	return true
 }
 
 func readFileToString(filepath string) string {
