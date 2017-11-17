@@ -95,7 +95,7 @@ func main() {
 	// parse help, version, usage command line flags and handle them
 	switch {
 	case *versionShort, *versionLong:
-		os.Stdout.WriteString("uni v" + Version + "\n")
+		os.Stdout.WriteString("ink v" + Version + "\n")
 		os.Exit(0)
 	case *helpShort, *helpLong:
 		os.Stdout.WriteString(Help)
