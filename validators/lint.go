@@ -31,7 +31,7 @@ import (
 	"github.com/chrissimpkins/ink/io"
 )
 
-// LintTemplateSuccess is an ink template linting function that returns (success = bool, error) response
+// LintTemplateSuccess is an ink template linting function for file on path filePath that returns (success = bool, error) response
 func LintTemplateSuccess(filePath string) (bool, error) {
 	templateText, readerr := io.ReadFileToString(filePath)
 	if readerr != nil {
