@@ -30,7 +30,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"text/template"
 )
@@ -114,7 +113,7 @@ func main() {
 
 	// LINT: lint the template files
 	if *lintFlag {
-		failFound := false   // flag that tracks presence of linting failure(s), used for exit status code
+		failFound := false // flag that tracks presence of linting failure(s), used for exit status code
 		for _, templatePath := range templatePaths {
 			// Create a new template and parse the letter into it.
 			success, err := lintTemplateSuccess(templatePath)
@@ -137,7 +136,11 @@ func main() {
 	// Handle single pass replacement from command line `--replace=[string]` flag
 	if len(*replaceString) > 0 {
 		for _, templatePath := range templatePaths {
-			templateText := readFileToString(templatePath)
+			templateText, readerr := readFileToString(templatePath)
+			if readerr != nil {
+				errstring := fmt.Sprintf("%v", readerr)
+				os.Stderr.WriteString("[ink] ERROR: unable to read template file '" + templatePath + "'. " + errstring + "\n")
+			}
 			//funcs := template.FuncMap{"ink": ink}
 			//t, err := template.New("ink").Funcs(funcs).Parse(templateText)
 			t, err := template.New("ink").Parse(templateText)
@@ -186,21 +189,23 @@ func main() {
 }
 
 func lintTemplateSuccess(filePath string) (bool, error) {
-	templateText := readFileToString(filePath)
-	_, err := template.New("ink").Parse(templateText)
-	if err != nil {
-		return false, err
+	templateText, readerr := readFileToString(filePath)
+	if readerr != nil {
+		return false, readerr
+	}
+	_, templateerr := template.New("ink").Parse(templateText)
+	if templateerr != nil {
+		return false, templateerr
 	}
 
-	return true, err
+	return true, templateerr
 }
 
-func readFileToString(filepath string) string {
-
+func readFileToString(filepath string) (string, error) {
 	byteString, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	return string(byteString)
+	return string(byteString), nil
 }
