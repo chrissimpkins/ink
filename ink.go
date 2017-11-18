@@ -41,7 +41,7 @@ const (
 	Version = "0.1.0"
 
 	// Usage is the application usage string
-	Usage = "Usage: ink [options] [template path 1]...[template path n]"
+	Usage = "Usage: ink [options] [template path 1]...[template path n]\n"
 
 	// Help is the application help string
 	Help = "=================================================\n" +
