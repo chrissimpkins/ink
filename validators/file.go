@@ -42,7 +42,7 @@ func FileExists(filePath string) (bool, error) {
 	return true, nil
 }
 
-func HasCorrectExtension(filePath string) (bool) {
+func HasCorrectExtension(filePath string) bool {
 	if strings.HasSuffix(filePath, ".in") {
 		return true
 	} else {

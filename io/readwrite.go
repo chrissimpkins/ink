@@ -26,9 +26,7 @@ SOFTWARE.
 package io
 
 import (
-
 	"io/ioutil"
-
 )
 
 // ReadFileToString reads text files from disk and returns (string, error)
