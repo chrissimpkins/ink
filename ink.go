@@ -88,7 +88,7 @@ func main() {
 
 	// test for at least one argument on command line
 	if len(os.Args) < 2 {
-		os.Stderr.WriteString("[Error] Please include at least one argument for your Unicode code point search\n")
+		os.Stderr.WriteString("[ink] ERROR: missing arguments to the ink executable. \n")
 		os.Stderr.WriteString(Usage)
 		os.Exit(1)
 	}
@@ -106,9 +106,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	// TODO: add template file path check for `.in` extension
-	// TODO: improve user messages for fails, successes
-
+	// parse all non-flag arguments on the command line
 	templatePaths := flag.Args()
 
 	/*
@@ -118,22 +116,29 @@ func main() {
 	*/
 	commandlinefail := false
 	for _, templatePath := range templatePaths {
+		// test for existence of requested template file on user specified file path
 		fileexists, fileerr := validators.FileExists(templatePath)
 		if !fileexists {
 			fileerrstring := fmt.Sprintf("%v", fileerr)
 			os.Stderr.WriteString("[ink] ERROR: " + fileerrstring + "\n")
 			commandlinefail = true
 		}
+
+		// test that template file is properly specified with `*.in` extension
+		if !validators.HasCorrectExtension(templatePath) {
+			os.Stderr.WriteString("[ink] ERROR: argument '" + templatePath + "' is not properly specified with *.in file extension.\n")
+			commandlinefail = true
+		}
 	}
 
-	// fail if any of the above validations failed
+	// exit with status code 1 if any of the above command line validations failed
 	if commandlinefail {
 		os.Exit(1)
 	}
 
 	/*
 
-		LINT TEMPLATE
+		LINT TEMPLATES
 
 	*/
 	if *lintFlag {

@@ -27,6 +27,7 @@ package validators
 
 import (
 	"os"
+	"strings"
 )
 
 // FileExists tests for existence of a file on filePath file path and returns (success = bool, error) response
@@ -39,4 +40,12 @@ func FileExists(filePath string) (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+func HasCorrectExtension(filePath string) (bool) {
+	if strings.HasSuffix(filePath, ".in") {
+		return true
+	} else {
+		return false
+	}
 }
