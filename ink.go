@@ -106,14 +106,36 @@ func main() {
 		os.Exit(0)
 	}
 
-	// TODO: add file path checks
 	// TODO: add template file path check for `.in` extension
 	// TODO: improve user messages for fails, successes
 
-	//templatePath := os.Args[len(os.Args)-1]
 	templatePaths := flag.Args()
 
-	// LINT: lint the template files
+	/*
+
+		COMMAND LINE VALIDATIONS
+
+	*/
+	commandlinefail := false
+	for _, templatePath := range templatePaths {
+		fileexists, fileerr := validators.FileExists(templatePath)
+		if !fileexists {
+			fileerrstring := fmt.Sprintf("%v", fileerr)
+			os.Stderr.WriteString("[ink] ERROR: " + fileerrstring + "\n")
+			commandlinefail = true
+		}
+	}
+
+	// fail if any of the above validations failed
+	if commandlinefail {
+		os.Exit(1)
+	}
+
+	/*
+
+		LINT TEMPLATE
+
+	*/
 	if *lintFlag {
 		failFound := false // flag that tracks presence of linting failure(s), used for exit status code
 		for _, templatePath := range templatePaths {
@@ -135,7 +157,11 @@ func main() {
 		}
 	}
 
-	// Handle single pass replacement from command line `--replace=[string]` flag
+	/*
+
+		RENDER TEMPLATES
+
+	*/
 	if len(*replaceString) > 0 {
 		for _, templatePath := range templatePaths {
 			templateText, readerr := io.ReadFileToString(templatePath)
