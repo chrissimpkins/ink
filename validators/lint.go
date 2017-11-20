@@ -28,12 +28,12 @@ package validators
 import (
 	"text/template"
 
-	"github.com/chrissimpkins/ink/io"
+	"github.com/chrissimpkins/ink/inkio"
 )
 
 // LintTemplateSuccess is an ink template linting function for file on path filePath that returns (success = bool, error) response
 func LintTemplateSuccess(filePath string) (bool, error) {
-	templateText, readerr := io.ReadFileToString(filePath)
+	templateText, readerr := inkio.ReadFileToString(filePath)
 	if readerr != nil {
 		return false, readerr
 	}
