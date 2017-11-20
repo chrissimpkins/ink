@@ -26,13 +26,11 @@ SOFTWARE.
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"os"
-	"text/template"
 
-	"github.com/chrissimpkins/ink/io"
+	"github.com/chrissimpkins/ink/renderers"
 	"github.com/chrissimpkins/ink/validators"
 )
 
@@ -58,15 +56,9 @@ const (
 		" -v, --version        Application version\n\n"
 )
 
-// ReplacementStrings is a struct that maintains the strings for text replacements
-type ReplacementStrings struct {
-	One, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten string
-	Ink                                                       string
-}
-
 var versionShort, versionLong, helpShort, helpLong, usageLong *bool
 var lintFlag, stdOutFlag *bool
-var replaceString *string
+var findString, replaceString *string
 
 func init() {
 	// define available command line flag arguments
@@ -76,7 +68,8 @@ func init() {
 	helpLong = flag.Bool("help", false, "Help")
 	usageLong = flag.Bool("usage", false, "Usage")
 
-	replaceString = flag.String("replace", "", "Optional string replacement")
+	findString = flag.String("find", "", "Optional find string for replacement")
+	replaceString = flag.String("replace", "", "Replacement string")
 	lintFlag = flag.Bool("lint", false, "Lint the template file(s)")
 	stdOutFlag = flag.Bool("stdout", false, "Write to standard output stream")
 }
@@ -126,7 +119,7 @@ func main() {
 
 		// test that template file is properly specified with `*.in` extension
 		if !validators.HasCorrectExtension(templatePath) {
-			os.Stderr.WriteString("[ink] ERROR: argument '" + templatePath + "' is not properly specified with *.in file extension.\n")
+			os.Stderr.WriteString("[ink] ERROR: argument '" + templatePath + "' is not a properly specified template with *.in file extension.\n")
 			commandlinefail = true
 		}
 	}
@@ -164,55 +157,27 @@ func main() {
 
 	/*
 
-		RENDER TEMPLATES
+		RENDER TEMPLATES & WRITE (to file or stdout stream)
 
 	*/
 	if len(*replaceString) > 0 {
 		for _, templatePath := range templatePaths {
-			templateText, readerr := io.ReadFileToString(templatePath)
-			if readerr != nil {
-				errstring := fmt.Sprintf("%v", readerr)
-				os.Stderr.WriteString("[ink] ERROR: unable to read template file '" + templatePath + "'. " + errstring + "\n")
-			}
-			//funcs := template.FuncMap{"ink": ink}
-			//t, err := template.New("ink").Funcs(funcs).Parse(templateText)
-			t, err := template.New("ink").Parse(templateText)
+			renderedStringPointer, err := renderers.RenderFromInkTemplate(templatePath, replaceString)
 			if err != nil {
-				os.Stderr.WriteString("[ink] ERROR: ink template could not be parsed. " + fmt.Sprintf("%v", err))
-				os.Exit(1)
-			}
-			r := ReplacementStrings{
-				*replaceString,
-				"{{.One}}",
-				"{{.Two}}",
-				"{{.Three}}",
-				"{{.Four}}",
-				"{{.Five}}",
-				"{{.Six}}",
-				"{{.Seven}}",
-				"{{.Eight}}",
-				"{{.Nine}}",
-				*replaceString,
-			}
-			outPath := templatePath[0 : len(templatePath)-3]
-
-			buf := new(bytes.Buffer)
-			executeerr := t.Execute(buf, r)
-			if executeerr != nil {
-				errstring := fmt.Sprintf("[ink] ERROR: while executing template '%s' encountered error: %v\n", templatePath, executeerr)
-				os.Stderr.WriteString(errstring)
+				os.Stderr.WriteString(fmt.Sprintf("%v", err))
 				os.Exit(1)
 			}
 
 			if *stdOutFlag {
-				os.Stdout.WriteString(buf.String())
+				os.Stdout.WriteString(*renderedStringPointer)
 			} else {
+				outPath := templatePath[0 : len(templatePath)-3]
 				f, err := os.Create(outPath)
 				if err != nil {
-					os.Stderr.WriteString("**** TODO ****")
+					os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: unable to write rendered template to disk. %v\n", err))
 					os.Exit(1)
 				}
-				f.WriteString(buf.String())
+				f.WriteString(*renderedStringPointer)
 				f.Sync()
 				f.Close()
 			}
