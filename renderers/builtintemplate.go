@@ -1,4 +1,4 @@
-// builtin holds the rendering implementation for builtin (Go style) text file template rendering
+// builtintemplate holds the rendering implementation for builtin (Go style) text file template syntax rendering
 /*
 MIT License
 
@@ -30,7 +30,7 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/chrissimpkins/ink/io"
+	"github.com/chrissimpkins/ink/inkio"
 )
 
 // ReplacementStrings is a struct that maintains the strings for text replacements
@@ -42,7 +42,7 @@ type ReplacementStrings struct {
 // RenderFromInkTemplate is a function that renders a text template on path templatePath with a user specified
 // replacement string replaceString (pointer to string) and returns pointer to rendered string and error
 func RenderFromInkTemplate(templatePath string, replaceString *string) (*string, error) {
-	templateText, readerr := io.ReadFileToString(templatePath)
+	templateText, readerr := inkio.ReadFileToString(templatePath)
 	emptystring := "" // returned with errors
 
 	if readerr != nil {
