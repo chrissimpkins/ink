@@ -30,6 +30,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/chrissimpkins/ink/inkio"
 	"github.com/chrissimpkins/ink/renderers"
 	"github.com/chrissimpkins/ink/validators"
 )
@@ -39,7 +40,7 @@ const (
 	Version = "0.1.0"
 
 	// Usage is the application usage string
-	Usage = "Usage: ink [options] [template path 1]...[template path n]\n"
+	Usage = "Usage: ink --replace=[string] [options] [template path 1]...[template path n]\n"
 
 	// Help is the application help string
 	Help = "=================================================\n" +
@@ -162,25 +163,28 @@ func main() {
 	*/
 	if len(*replaceString) > 0 {
 		for _, templatePath := range templatePaths {
-			renderedStringPointer, err := renderers.RenderFromInkTemplate(templatePath, replaceString)
-			if err != nil {
-				os.Stderr.WriteString(fmt.Sprintf("%v", err))
-				os.Exit(1)
-			}
-
-			if *stdOutFlag {
-				os.Stdout.WriteString(*renderedStringPointer)
-			} else {
-				outPath := templatePath[0 : len(templatePath)-3]
-				f, err := os.Create(outPath)
+			// if user specified --find flag with appropriate argument, perform user template rendering
+			if len(*findString) > 0 {
+				renderedStringPointer, err := renderers.RenderFromUserTemplate(templatePath, findString, replaceString)
 				if err != nil {
-					os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: unable to write rendered template to disk. %v\n", err))
+					os.Stderr.WriteString(fmt.Sprintf("%v", err))
 					os.Exit(1)
 				}
-				f.WriteString(*renderedStringPointer)
-				f.Sync()
-				f.Close()
+				inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
+			} else { // otherwise perform builtin template rendering
+				renderedStringPointer, err := renderers.RenderFromInkTemplate(templatePath, replaceString)
+				if err != nil {
+					os.Stderr.WriteString(fmt.Sprintf("%v", err))
+					os.Exit(1)
+				}
+				inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
 			}
+
 		}
+	} else {
+		// user did not specify a replacement string with the --replace flag on the command line
+		os.Stderr.WriteString("[ink] ERROR: please include a replacement string argument with the --replace flag.\n")
+		os.Stderr.WriteString(Usage)
+		os.Exit(1)
 	}
 }
