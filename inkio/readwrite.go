@@ -23,10 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package io
+package inkio
 
 import (
+	"fmt"
 	"io/ioutil"
+	"os"
 )
 
 // ReadFileToString reads text files from disk and returns (string, error)
@@ -37,4 +39,20 @@ func ReadFileToString(filepath string) (string, error) {
 	}
 
 	return string(byteString), nil
+}
+
+func WriteString(templatePath string, stdOutFlag bool, renderedStringPointer *string) {
+	if stdOutFlag {
+		os.Stdout.WriteString(*renderedStringPointer)
+	} else {
+		outPath := templatePath[0 : len(templatePath)-3]
+		f, err := os.Create(outPath)
+		if err != nil {
+			os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: unable to write rendered template to disk. %v\n", err))
+			os.Exit(1)
+		}
+		f.WriteString(*renderedStringPointer)
+		f.Sync()
+		f.Close()
+	}
 }
