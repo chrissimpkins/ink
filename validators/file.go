@@ -33,19 +33,20 @@ import (
 // FileExists tests for existence of a file on filePath file path and returns (success = bool, error) response
 func FileExists(filePath string) (bool, error) {
 	if _, err := os.Stat(filePath); err != nil {
-		if os.IsNotExist(err) {
-			return false, err
-		} else {
-			return false, err
-		}
+		//if os.IsNotExist(err) {
+		//	return false, err
+		//}
+
+		return false, err
 	}
 	return true, nil
 }
 
+// HasCorrectExtension returns a boolean value for the presence of the .in file extension on the filePath parameter
 func HasCorrectExtension(filePath string) bool {
 	if strings.HasSuffix(filePath, ".in") {
 		return true
-	} else {
-		return false
 	}
+
+	return false
 }

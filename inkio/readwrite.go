@@ -41,6 +41,9 @@ func ReadFileToString(filepath string) (string, error) {
 	return string(byteString), nil
 }
 
+// WriteString writes a rendered string renderedStringPointer to file or to the standard output stream as determined
+// by the stdOutFlag boolean parameter value.  File writes occur on a path that is created from templatePath with the
+// `.in` file extension suffix removed from the file path
 func WriteString(templatePath string, stdOutFlag bool, renderedStringPointer *string) {
 	if stdOutFlag {
 		os.Stdout.WriteString(*renderedStringPointer)
