@@ -46,14 +46,14 @@ func RenderFromInkTemplate(templatePath string, replaceString *string) (*string,
 	emptystring := "" // returned with errors
 
 	if readerr != nil {
-		responseReadErr := fmt.Errorf("[ink] ERROR: unable to read template file '%s'. %v\n", templatePath, readerr)
+		responseReadErr := fmt.Errorf("[ink] ERROR: unable to read template file '%s'. %v", templatePath, readerr)
 		return &emptystring, responseReadErr
 	}
 	//funcs := template.FuncMap{"ink": ink}
 	//t, err := template.New("ink").Funcs(funcs).Parse(templateText)
 	t, err := template.New("ink").Parse(templateText)
 	if err != nil {
-		templateParseErr := fmt.Errorf("[ink] ERROR: ink template '%s' could not be parsed. %v\n", templatePath, err)
+		templateParseErr := fmt.Errorf("[ink] ERROR: ink template '%s' could not be parsed. %v", templatePath, err)
 		return &emptystring, templateParseErr
 	}
 
@@ -73,7 +73,7 @@ func RenderFromInkTemplate(templatePath string, replaceString *string) (*string,
 	buf := new(bytes.Buffer)
 	executeerr := t.Execute(buf, r)
 	if executeerr != nil {
-		templateRenderErr := fmt.Errorf("[ink] ERROR: while executing template '%s' encountered error: %v\n", templatePath, executeerr)
+		templateRenderErr := fmt.Errorf("[ink] ERROR: while executing template '%s' encountered error: %v", templatePath, executeerr)
 		return &emptystring, templateRenderErr
 	}
 

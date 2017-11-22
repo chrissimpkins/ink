@@ -167,14 +167,14 @@ func main() {
 			if len(*findString) > 0 {
 				renderedStringPointer, err := renderers.RenderFromUserTemplate(templatePath, findString, replaceString)
 				if err != nil {
-					os.Stderr.WriteString(fmt.Sprintf("%v", err))
+					os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
 					os.Exit(1)
 				}
 				inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
 			} else { // otherwise perform builtin template rendering
 				renderedStringPointer, err := renderers.RenderFromInkTemplate(templatePath, replaceString)
 				if err != nil {
-					os.Stderr.WriteString(fmt.Sprintf("%v", err))
+					os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
 					os.Exit(1)
 				}
 				inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)

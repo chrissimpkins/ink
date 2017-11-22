@@ -40,7 +40,7 @@ func RenderFromUserTemplate(templatePath string, findString *string, replaceStri
 	emptystring := "" // returned with errors
 
 	if readerr != nil {
-		responseReadErr := fmt.Errorf("[ink] ERROR: unable to read template file '%s'. %v\n", templatePath, readerr)
+		responseReadErr := fmt.Errorf("[ink] ERROR: unable to read template file '%s'. %v", templatePath, readerr)
 		return &emptystring, responseReadErr
 	}
 
