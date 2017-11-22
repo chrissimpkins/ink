@@ -143,7 +143,7 @@ func main() {
 			if success {
 				fmt.Println("[✓] " + templatePath + ": Valid template")
 			} else {
-				errstring := fmt.Sprintf("%s", err)
+				errstring := fmt.Sprintf("%v", err)
 				os.Stderr.WriteString("[X] " + templatePath + ": FAIL --- " + errstring + "\n")
 				failFound = true
 			}
