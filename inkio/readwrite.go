@@ -50,12 +50,13 @@ func WriteString(templatePath string, stdOutFlag bool, renderedStringPointer *st
 	} else {
 		outPath := templatePath[0 : len(templatePath)-3]
 		f, err := os.Create(outPath)
+		defer f.Close()
 		if err != nil {
 			os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: unable to write rendered template to disk. %v\n", err))
 			os.Exit(1)
 		}
 		f.WriteString(*renderedStringPointer)
 		f.Sync()
-		f.Close()
+
 	}
 }
