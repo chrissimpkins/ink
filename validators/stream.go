@@ -27,7 +27,7 @@ package validators
 
 import "os"
 
-// test os.Stdin for presence of data, if present return true, else return false
+// StdinValidates tests os.Stdin for presence of data, if present return true, else return false
 func StdinValidates(stdin *os.File) bool {
 	f, err := stdin.Stat()
 	if err != nil { // unable to obtain file data with Stat() method call = fail
