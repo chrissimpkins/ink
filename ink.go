@@ -169,6 +169,11 @@ func main() {
 	*/
 	if len(*replaceString) > 0 {
 		for _, templatePath := range templatePaths {
+			if *trimNLFlag {
+				// trim newlines if the --trimnl flag is included in the command
+				// this is used in cases where data contains undesired newline values (e.g. piped from another command)
+				*replaceString = strings.TrimRight(*replaceString, "\n")
+			}
 			renderIt(templatePath, replaceString)
 		}
 	} else {
@@ -182,7 +187,9 @@ func main() {
 
 			stdinReplaceString := stdinReplaceBytes.String()
 			for _, templatePath := range templatePaths {
-				if *trimNLFlag == true {
+				if *trimNLFlag {
+					// trim newlines if the --trimnl flag is included in the command
+					// this is used in cases where data contains undesired newline values (e.g. piped from another command)
 					stdinReplaceString = strings.TrimRight(stdinReplaceString, "\n")
 				}
 				renderIt(templatePath, &stdinReplaceString)
