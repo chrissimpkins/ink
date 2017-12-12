@@ -42,7 +42,7 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.2.0"
+	Version = "0.2.1"
 
 	// Usage is the application usage string
 	Usage = "Usage: ink [options] [template path 1]...[template path n]\n"
@@ -55,9 +55,14 @@ const (
 		" Source: https://github.com/chrissimpkins/ink\n" +
 		"=================================================\n\n" +
 		" Usage:\n" +
-		"  $ ink [args]\n\n" +
+		"  $ ink [options] [template path 1]...[template path n]\n\n" +
 		" Options:\n" +
+		"     --find=          Find string value for template render\n" +
 		" -h, --help           Application help\n" +
+		"     --lint           Lint ink template file\n" +
+		"     --replace=       Replacement string value for template render\n" +
+		"     --stdout         Write render to standard output stream\n" +
+		"     --trimnl         Trim newline value from replacement string\n" +
 		"     --usage          Application usage\n" +
 		" -v, --version        Application version\n\n"
 )
