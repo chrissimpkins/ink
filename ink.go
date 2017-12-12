@@ -30,6 +30,11 @@ import (
 	"fmt"
 	"os"
 
+	"bytes"
+	"io"
+
+	"strings"
+
 	"github.com/chrissimpkins/ink/inkio"
 	"github.com/chrissimpkins/ink/renderers"
 	"github.com/chrissimpkins/ink/validators"
@@ -37,10 +42,10 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.1.0"
+	Version = "0.2.0"
 
 	// Usage is the application usage string
-	Usage = "Usage: ink --replace=[string] [options] [template path 1]...[template path n]\n"
+	Usage = "Usage: ink [options] [template path 1]...[template path n]\n"
 
 	// Help is the application help string
 	Help = "=================================================\n" +
@@ -58,7 +63,7 @@ const (
 )
 
 var versionShort, versionLong, helpShort, helpLong, usageLong *bool
-var lintFlag, stdOutFlag *bool
+var lintFlag, stdOutFlag, trimNLFlag *bool
 var findString, replaceString *string
 
 func init() {
@@ -73,6 +78,7 @@ func init() {
 	replaceString = flag.String("replace", "", "Replacement string")
 	lintFlag = flag.Bool("lint", false, "Lint the template file(s)")
 	stdOutFlag = flag.Bool("stdout", false, "Write to standard output stream")
+	trimNLFlag = flag.Bool("trimnl", false, "trim newline characters at the end of the replacement string")
 }
 
 func main() {
@@ -163,28 +169,49 @@ func main() {
 	*/
 	if len(*replaceString) > 0 {
 		for _, templatePath := range templatePaths {
-			// if user specified --find flag with appropriate argument, perform user template rendering
-			if len(*findString) > 0 {
-				renderedStringPointer, err := renderers.RenderFromUserTemplate(templatePath, findString, replaceString)
-				if err != nil {
-					os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
-					os.Exit(1)
-				}
-				inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
-			} else { // otherwise perform builtin template rendering
-				renderedStringPointer, err := renderers.RenderFromInkTemplate(templatePath, replaceString)
-				if err != nil {
-					os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
-					os.Exit(1)
-				}
-				inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
-			}
-
+			renderIt(templatePath, replaceString)
 		}
 	} else {
-		// user did not specify a replacement string with the --replace flag on the command line
-		os.Stderr.WriteString("[ink] ERROR: please include a replacement string argument with the --replace flag.\n")
-		os.Stderr.WriteString(Usage)
-		os.Exit(1)
+		if validators.StdinValidates(os.Stdin) {
+			// there was no replace flag at the command line but there were data piped to the stdin stream
+			// use standard input stream as the replacement string
+			stdinReplaceBytes := new(bytes.Buffer)
+			if _, err := io.Copy(stdinReplaceBytes, os.Stdin); err != nil {
+				// handle failed read of stdin stream
+			}
+
+			stdinReplaceString := stdinReplaceBytes.String()
+			for _, templatePath := range templatePaths {
+				if *trimNLFlag == true {
+					stdinReplaceString = strings.TrimRight(stdinReplaceString, "\n")
+				}
+				renderIt(templatePath, &stdinReplaceString)
+			}
+
+		} else {
+			// user did not specify a replacement string with the --replace flag on the command line
+			os.Stderr.WriteString("[ink] ERROR: please include a replacement string argument with the --replace flag.\n")
+			os.Stderr.WriteString(Usage)
+			os.Exit(1)
+		}
+	}
+}
+
+func renderIt(templatePath string, replaceString *string) {
+	// if user specified --find flag with appropriate argument, perform user template rendering
+	if len(*findString) > 0 {
+		renderedStringPointer, err := renderers.RenderFromUserTemplate(templatePath, findString, replaceString)
+		if err != nil {
+			os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
+			os.Exit(1)
+		}
+		inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
+	} else { // otherwise perform builtin template rendering
+		renderedStringPointer, err := renderers.RenderFromInkTemplate(templatePath, replaceString)
+		if err != nil {
+			os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
+			os.Exit(1)
+		}
+		inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
 	}
 }
