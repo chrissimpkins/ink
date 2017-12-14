@@ -1,5 +1,10 @@
 ## Changelog
 
+### v0.3.0
+
+- [main] added support for parallel template rendering
+- [main] added support for concurrent template writes
+
 ### v0.2.1
 
 - [main] added `--help` documentation with all available options
