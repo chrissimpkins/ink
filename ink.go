@@ -35,6 +35,8 @@ import (
 
 	"strings"
 
+	"sync"
+
 	"github.com/chrissimpkins/ink/inkio"
 	"github.com/chrissimpkins/ink/renderers"
 	"github.com/chrissimpkins/ink/validators"
@@ -42,7 +44,7 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.2.1"
+	Version = "0.3.0"
 
 	// Usage is the application usage string
 	Usage = "Usage: ink [options] [template path 1]...[template path n]\n"
@@ -172,6 +174,8 @@ func main() {
 		RENDER TEMPLATES & WRITE (to file or stdout stream)
 
 	*/
+	var wg sync.WaitGroup
+
 	if len(*replaceString) > 0 {
 		for _, templatePath := range templatePaths {
 			if *trimNLFlag {
@@ -179,8 +183,17 @@ func main() {
 				// this is used in cases where data contains undesired newline values (e.g. piped from another command)
 				*replaceString = strings.TrimRight(*replaceString, "\n")
 			}
-			renderIt(templatePath, replaceString)
+
+			wg.Add(1)
+			go func(templatePath string, replaceString *string) {
+				defer wg.Done()
+				renderIt(templatePath, replaceString)
+				fmt.Printf("[ink] Template %s rendered successfully.\n", templatePath)
+			}(templatePath, replaceString)
 		}
+
+		wg.Wait()
+		os.Stdout.WriteString("[ink] Render complete.\n")
 	} else {
 		if validators.StdinValidates(os.Stdin) {
 			// there was no replace flag at the command line but there were data piped to the stdin stream
@@ -197,9 +210,17 @@ func main() {
 					// this is used in cases where data contains undesired newline values (e.g. piped from another command)
 					stdinReplaceString = strings.TrimRight(stdinReplaceString, "\n")
 				}
-				renderIt(templatePath, &stdinReplaceString)
+
+				wg.Add(1)
+				go func(templatePath string, stdinReplaceString string) {
+					defer wg.Done()
+					renderIt(templatePath, &stdinReplaceString)
+					fmt.Printf("[ink] Template %s rendered successfully.\n", templatePath)
+				}(templatePath, stdinReplaceString)
 			}
 
+			wg.Wait()
+			os.Stdout.WriteString("[ink] Render complete.\n")
 		} else {
 			// user did not specify a replacement string with the --replace flag on the command line
 			os.Stderr.WriteString("[ink] ERROR: please include a replacement string argument with the --replace flag.\n")
