@@ -1,5 +1,7 @@
 ## Changelog
 
+- [main] added standard input stream error handling
+
 ### v0.3.0
 
 - [main] added support for parallel template rendering
