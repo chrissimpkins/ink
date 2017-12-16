@@ -32,7 +32,6 @@ import (
 	"io"
 	"os"
 	"strings"
-
 	"sync"
 
 	"github.com/chrissimpkins/ink/inkio"
