@@ -42,7 +42,7 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.4.0"
+	Version = "0.4.1"
 
 	// Usage is the application usage string
 	Usage = "Usage: ink [options] [template path 1]...[template path n]\n"
@@ -262,15 +262,15 @@ func renderIt(templatePath string, replaceString *string) error {
 			return writeerr
 		}
 		return nil
-	} else { // otherwise perform builtin template rendering
-		renderedStringPointer, rendererr := renderers.RenderFromInkTemplate(templatePath, replaceString)
-		if rendererr != nil {
-			return rendererr
-		}
-		writeerr := inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
-		if writeerr != nil {
-			return writeerr
-		}
-		return nil
 	}
+	// otherwise perform builtin template rendering
+	renderedStringPointer, rendererr := renderers.RenderFromInkTemplate(templatePath, replaceString)
+	if rendererr != nil {
+		return rendererr
+	}
+	writeerr := inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
+	if writeerr != nil {
+		return writeerr
+	}
+	return nil
 }
