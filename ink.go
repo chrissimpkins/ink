@@ -26,15 +26,12 @@ SOFTWARE.
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
-	"os"
-
-	"bytes"
 	"io"
-
+	"os"
 	"strings"
-
 	"sync"
 
 	"github.com/chrissimpkins/ink/inkio"
@@ -44,7 +41,7 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.3.1"
+	Version = "0.4.0"
 
 	// Usage is the application usage string
 	Usage = "Usage: ink [options] [template path 1]...[template path n]\n"
@@ -73,11 +70,6 @@ var versionShort, versionLong, helpShort, helpLong, usageLong *bool
 var lintFlag, stdOutFlag, trimNLFlag *bool
 var findString, replaceString *string
 
-type response struct {
-	msg string
-	err error
-}
-
 func init() {
 	// define available command line flag arguments
 	versionShort = flag.Bool("v", false, "Application version")
@@ -100,7 +92,7 @@ func main() {
 
 	// test for at least one argument on command line
 	if len(os.Args) < 2 {
-		os.Stderr.WriteString("[ink] ERROR: missing arguments to the ink executable. \n")
+		os.Stderr.WriteString("[ink] ERROR: Missing arguments to the ink executable. \n")
 		os.Stderr.WriteString(Usage)
 		os.Exit(1)
 	}
@@ -138,7 +130,7 @@ func main() {
 
 		// test that template file is properly specified with `*.in` extension
 		if !validators.HasCorrectExtension(templatePath) {
-			os.Stderr.WriteString("[ink] ERROR: argument '" + templatePath + "' is not a properly specified template with *.in file extension.\n")
+			os.Stderr.WriteString("[ink] ERROR: Argument '" + templatePath + "' is not a properly specified template with *.in file extension.\n")
 			commandlinefail = true
 		}
 	}
@@ -192,20 +184,28 @@ func main() {
 			wg.Add(1)
 			go func(templatePath string, replaceString *string) {
 				defer wg.Done()
-				renderIt(templatePath, replaceString)
-				fmt.Printf("[ink] Template %s rendered successfully.\n", templatePath)
+				err := renderIt(templatePath, replaceString)
+				if err != nil {
+					os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render template %s to file. %v\n", templatePath, err))
+					os.Exit(1)
+				}
+				if !*stdOutFlag { // print confirmation only if the user did not print to render to stdout stream
+					fmt.Printf("[ink] Template %s rendered successfully.\n", templatePath)
+				}
 			}(templatePath, replaceString)
 		}
 
 		wg.Wait()
-		os.Stdout.WriteString("[ink] Render complete.\n")
+		if !*stdOutFlag { // confirm that the writes are all complete if user did not render to stdout stream
+			os.Stdout.WriteString("[ink] Render complete.\n")
+		}
 	} else {
 		if validators.StdinValidates(os.Stdin) {
 			// there was no replace flag at the command line but there were data piped to the stdin stream
 			// use standard input stream as the replacement string
 			stdinReplaceBytes := new(bytes.Buffer)
 			if _, err := io.Copy(stdinReplaceBytes, os.Stdin); err != nil {
-				os.Stderr.WriteString("[ink] ERROR: unable to read standard input stream. " + fmt.Sprintf("%v", err))
+				os.Stderr.WriteString("[ink] ERROR: Unable to read standard input stream. " + fmt.Sprintf("%v\n", err))
 				os.Exit(1)
 			}
 
@@ -220,8 +220,14 @@ func main() {
 				wg.Add(1)
 				go func(templatePath string, stdinReplaceString string) {
 					defer wg.Done()
-					renderIt(templatePath, &stdinReplaceString)
-					fmt.Printf("[ink] Template %s rendered successfully.\n", templatePath)
+					err := renderIt(templatePath, &stdinReplaceString)
+					if err != nil {
+						os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render template %s to file. %v\n", templatePath, err))
+						os.Exit(1)
+					}
+					if !*stdOutFlag { // print confirmation only if the user did not print to render to stdout stream
+						fmt.Printf("[ink] Template %s rendered successfully.\n", templatePath)
+					}
 				}(templatePath, stdinReplaceString)
 			}
 
@@ -229,28 +235,34 @@ func main() {
 			os.Stdout.WriteString("[ink] Render complete.\n")
 		} else {
 			// user did not specify a replacement string with the --replace flag on the command line
-			os.Stderr.WriteString("[ink] ERROR: please include a replacement string argument with the --replace flag.\n")
+			os.Stderr.WriteString("[ink] ERROR: Please include a replacement string argument with the --replace flag.\n")
 			os.Stderr.WriteString(Usage)
 			os.Exit(1)
 		}
 	}
 }
 
-func renderIt(templatePath string, replaceString *string) {
+func renderIt(templatePath string, replaceString *string) error {
 	// if user specified --find flag with appropriate argument, perform user template rendering
 	if len(*findString) > 0 {
-		renderedStringPointer, err := renderers.RenderFromUserTemplate(templatePath, findString, replaceString)
-		if err != nil {
-			os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
-			os.Exit(1)
+		renderedStringPointer, rendererr := renderers.RenderFromUserTemplate(templatePath, findString, replaceString)
+		if rendererr != nil {
+			return rendererr
 		}
-		inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
+		writeerr := inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
+		if writeerr != nil {
+			return writeerr
+		}
+		return nil
 	} else { // otherwise perform builtin template rendering
-		renderedStringPointer, err := renderers.RenderFromInkTemplate(templatePath, replaceString)
-		if err != nil {
-			os.Stderr.WriteString(fmt.Sprintf("%v\n", err))
-			os.Exit(1)
+		renderedStringPointer, rendererr := renderers.RenderFromInkTemplate(templatePath, replaceString)
+		if rendererr != nil {
+			return rendererr
 		}
-		inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
+		writeerr := inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
+		if writeerr != nil {
+			return writeerr
+		}
+		return nil
 	}
 }

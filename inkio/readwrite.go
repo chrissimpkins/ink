@@ -26,7 +26,6 @@ SOFTWARE.
 package inkio
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 )
@@ -44,19 +43,21 @@ func ReadFileToString(filepath string) (string, error) {
 // WriteString writes a rendered string renderedStringPointer to file or to the standard output stream as determined
 // by the stdOutFlag boolean parameter value.  File writes occur on a path that is created from templatePath with the
 // `.in` file extension suffix removed from the file path
-func WriteString(templatePath string, stdOutFlag bool, renderedStringPointer *string) {
+func WriteString(templatePath string, stdOutFlag bool, renderedStringPointer *string) error {
 	if stdOutFlag {
 		os.Stdout.WriteString(*renderedStringPointer)
 	} else {
 		outPath := templatePath[0 : len(templatePath)-3]
-		f, err := os.Create(outPath)
+		f, err1 := os.Create(outPath)
 		defer f.Close()
-		if err != nil {
-			os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: unable to write rendered template to disk. %v\n", err))
-			os.Exit(1)
+		if err1 != nil {
+			return err1
 		}
-		f.WriteString(*renderedStringPointer)
+		_, err2 := f.WriteString(*renderedStringPointer)
+		if err2 != nil {
+			return err2
+		}
 		f.Sync()
-
 	}
+	return nil
 }
