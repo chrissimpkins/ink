@@ -32,6 +32,7 @@ import (
 	"io"
 	"os"
 	"strings"
+
 	"sync"
 
 	"github.com/chrissimpkins/ink/inkio"
@@ -168,77 +169,84 @@ func main() {
 
 	/*
 
-		RENDER TEMPLATES & WRITE (to file or stdout stream)
+	   PREPARE THE REPLACEMENT STRING FOR WRITE
 
 	*/
-	var wg sync.WaitGroup
 
 	if len(*replaceString) > 0 {
-		for _, templatePath := range templatePaths {
-			if *trimNLFlag {
-				// trim newlines if the --trimnl flag is included in the command
-				// this is used in cases where data contains undesired newline values (e.g. piped from another command)
-				*replaceString = strings.TrimRight(*replaceString, "\n")
-			}
-
-			wg.Add(1)
-			go func(templatePath string, replaceString *string) {
-				defer wg.Done()
-				err := renderIt(templatePath, replaceString)
-				if err != nil {
-					os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render template %s to file. %v\n", templatePath, err))
-					os.Exit(1)
-				}
-				if !*stdOutFlag { // print confirmation only if the user did not print to render to stdout stream
-					fmt.Printf("[ink] Template %s rendered successfully.\n", templatePath)
-				}
-			}(templatePath, replaceString)
-		}
-
-		wg.Wait()
-		if !*stdOutFlag { // confirm that the writes are all complete if user did not render to stdout stream
-			os.Stdout.WriteString("[ink] Render complete.\n")
-		}
-	} else {
-		if validators.StdinValidates(os.Stdin) {
-			// there was no replace flag at the command line but there were data piped to the stdin stream
-			// use standard input stream as the replacement string
-			stdinReplaceBytes := new(bytes.Buffer)
-			if _, err := io.Copy(stdinReplaceBytes, os.Stdin); err != nil {
-				os.Stderr.WriteString("[ink] ERROR: Unable to read standard input stream. " + fmt.Sprintf("%v\n", err))
-				os.Exit(1)
-			}
-
-			stdinReplaceString := stdinReplaceBytes.String()
-			for _, templatePath := range templatePaths {
-				if *trimNLFlag {
-					// trim newlines if the --trimnl flag is included in the command
-					// this is used in cases where data contains undesired newline values (e.g. piped from another command)
-					stdinReplaceString = strings.TrimRight(stdinReplaceString, "\n")
-				}
-
-				wg.Add(1)
-				go func(templatePath string, stdinReplaceString string) {
-					defer wg.Done()
-					err := renderIt(templatePath, &stdinReplaceString)
-					if err != nil {
-						os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render template %s to file. %v\n", templatePath, err))
-						os.Exit(1)
-					}
-					if !*stdOutFlag { // print confirmation only if the user did not print to render to stdout stream
-						fmt.Printf("[ink] Template %s rendered successfully.\n", templatePath)
-					}
-				}(templatePath, stdinReplaceString)
-			}
-
-			wg.Wait()
-			os.Stdout.WriteString("[ink] Render complete.\n")
-		} else {
-			// user did not specify a replacement string with the --replace flag on the command line
-			os.Stderr.WriteString("[ink] ERROR: Please include a replacement string argument with the --replace flag.\n")
-			os.Stderr.WriteString(Usage)
+		// do nothing, gtg if defined
+	} else if validators.StdinValidates(os.Stdin) {
+		// there was no replace flag at the command line but there were data piped to the stdin stream
+		// use standard input stream as the replacement string
+		stdinReplaceBytes := new(bytes.Buffer)
+		if _, err := io.Copy(stdinReplaceBytes, os.Stdin); err != nil {
+			os.Stderr.WriteString("[ink] ERROR: Unable to read standard input stream. " + fmt.Sprintf("%v\n", err))
 			os.Exit(1)
 		}
+
+		*replaceString = stdinReplaceBytes.String()
+
+	} else {
+		// user did not specify a replacement string with the --replace flag on the command line
+		// or pipe replacement string to stdin stream
+		os.Stderr.WriteString("[ink] ERROR: Missing replacement string for template render.\n")
+		os.Stderr.WriteString(Usage)
+		os.Exit(1)
+	}
+
+	// Trim newlines if requested on commandline with --trimnl flag
+	if *trimNLFlag {
+		*replaceString = strings.TrimRight(*replaceString, "\n")
+	}
+
+	/*
+
+		RENDER TEMPLATES & WRITE (to file or stdout stream)
+		- renders multi-template requests in parallel
+
+	*/
+
+	var wg sync.WaitGroup
+
+	errorc := make(chan bool) // channel used to communicate render/write failures from go routines that are executing them
+	for _, templatePath := range templatePaths {
+		wg.Add(1)
+		go func(templatePath string, replaceString *string) {
+			defer wg.Done()
+			err := renderIt(templatePath, replaceString)
+			if err != nil {
+				os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render template %s to file. %v\n", templatePath, err))
+				errorc <- true // true = error occurred
+			}
+			errorc <- false                 // false = error did not occur
+			if !*stdOutFlag && err == nil { // print confirmation only if the user did not print to render to stdout stream
+				fmt.Printf("[ink] Template %s rendered successfully.\n", templatePath)
+			}
+		}(templatePath, replaceString)
+	}
+
+	// must make the wait and close concurrent with the executing worker go routines
+	go func() {
+		wg.Wait()
+		close(errorc)
+	}()
+
+	exitfail := false                   // flag to indicate that a failure occurred for appropriate exit status code on application exit
+	for errorOccurred := range errorc { // iterate through the booleans to determine if error occurred during execution
+		if errorOccurred == true {
+			exitfail = true
+		}
+	}
+
+	if exitfail {
+		os.Exit(1) // fail with exit status code 1 if error occurred during execution of any template renders
+	}
+
+	// reachable only if error did not occur
+	// indicate render completed successfully if not printing to stdout stream
+	// this is intended for user notification in the setting of "long" running multi-template renders
+	if !*stdOutFlag { // confirm that the writes are all complete if user did not render to stdout stream
+		os.Stdout.WriteString("[ink] Render complete.\n")
 	}
 }
 
