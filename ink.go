@@ -73,6 +73,11 @@ var versionShort, versionLong, helpShort, helpLong, usageLong *bool
 var lintFlag, stdOutFlag, trimNLFlag *bool
 var findString, replaceString *string
 
+type response struct {
+	msg string
+	err error
+}
+
 func init() {
 	// define available command line flag arguments
 	versionShort = flag.Bool("v", false, "Application version")
@@ -200,7 +205,8 @@ func main() {
 			// use standard input stream as the replacement string
 			stdinReplaceBytes := new(bytes.Buffer)
 			if _, err := io.Copy(stdinReplaceBytes, os.Stdin); err != nil {
-				// handle failed read of stdin stream
+				os.Stderr.WriteString("[ink] ERROR: unable to read standard input stream. " + fmt.Sprintf("%v", err))
+				os.Exit(1)
 			}
 
 			stdinReplaceString := stdinReplaceBytes.String()
