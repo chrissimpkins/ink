@@ -1,11 +1,20 @@
 ## Changelog
 
+### v0.4.0
+
+- refactored entire approach to parallel template renders/file writes from stdin and command line argument defined template renders
+    - eliminated duplicated source code
+    - added detection of template rendering errors across all go routines
+    - added appropriate exit status code reporting for any rendering errors during parallel renders
+
+### v0.3.1
+
 - [main] added standard input stream error handling
 
 ### v0.3.0
 
-- [main] added support for parallel template rendering
-- [main] added support for concurrent template writes
+- added support for parallel template rendering
+- added support for concurrent template writes
 
 ### v0.2.1
 
