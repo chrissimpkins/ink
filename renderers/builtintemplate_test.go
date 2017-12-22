@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestRenderLowercaseInkTag(t *testing.T) {
+func TestRenderBuiltinLowercaseInkTag(t *testing.T) {
 	tests := []struct {
 		templatepath string
 		replacement  string
@@ -27,7 +27,7 @@ func TestRenderLowercaseInkTag(t *testing.T) {
 	}
 }
 
-func TestRenderUppercaseInkTag(t *testing.T) {
+func TestRenderBuiltinUppercaseInkTag(t *testing.T) {
 	tests := []struct {
 		templatepath string
 		replacement  string
@@ -49,7 +49,7 @@ func TestRenderUppercaseInkTag(t *testing.T) {
 	}
 }
 
-func TestRenderBadFilePathRaisesError(t *testing.T) {
+func TestRenderBuiltinBadFilePathRaisesError(t *testing.T) {
 	replacestring := "testing"
 	_, err := RenderFromInkTemplate("completelybogus.txt.in", &replacestring)
 	if err == nil {
