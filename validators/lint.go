@@ -37,10 +37,15 @@ func LintTemplateSuccess(filePath string) (bool, error) {
 	if readerr != nil {
 		return false, readerr
 	}
-	_, templateerr := template.New("ink").Parse(templateText)
+	funcs := template.FuncMap{"ink": inklint}
+	_, templateerr := template.New("ink").Funcs(funcs).Parse(templateText)
+	//_, templateerr := template.New("ink").Parse(templateText)
 	if templateerr != nil {
 		return false, templateerr
 	}
 
 	return true, templateerr
 }
+
+// need this empty function to support valid use (and therefore linting for validity) of {{ ink }} tag in templates
+func inklint() string { return "" }
