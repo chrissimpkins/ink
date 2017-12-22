@@ -63,22 +63,22 @@ func TestWriteStringToFile(t *testing.T) {
 	mockTemplatePath := "testing.txt.in"
 	mockOutPath := "testing.txt"
 	teststring := "this is a test"
-	err := WriteString(mockTemplatePath, false, &teststring)
-	if err != nil {
-		t.Errorf("[FAIL] There was an error with the file write for the TestWriteStringToFile test: %v", err)
+	writeerr := WriteString(mockTemplatePath, false, &teststring)
+	if writeerr != nil {
+		t.Errorf("[FAIL] There was an error with the file write for the TestWriteStringToFile test: %v", writeerr)
 	}
 
-	if _, err := os.Stat(mockOutPath); !os.IsNotExist(err) {
+	if _, fileerr := os.Stat(mockOutPath); !os.IsNotExist(fileerr) {
 
-		readstring, err := ioutil.ReadFile(mockOutPath)
-		if err != nil {
-			t.Errorf("[FAIL] Unable to read expected text file %s in TestWriteStringToFile test. %v", mockOutPath, err)
+		readstring, readerr := ioutil.ReadFile(mockOutPath)
+		if readerr != nil {
+			t.Errorf("[FAIL] Unable to read expected text file %s in TestWriteStringToFile test. %v", mockOutPath, readerr)
 		}
 		if string(readstring) != teststring {
 			t.Errorf("[FAIL] Expected to read '%s' from test file and actually read '%s'", teststring, readstring)
 		}
 		os.Remove(mockOutPath)
 	} else {
-		t.Errorf("[FAIL] The expected file write for the TestWriteStringToFile test was not found. %v", err)
+		t.Errorf("[FAIL] The expected file write for the TestWriteStringToFile test was not found. %v", fileerr)
 	}
 }
