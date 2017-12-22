@@ -5,8 +5,15 @@ import (
 	"testing"
 )
 
-func TestLintTemplateSuccessValidTemplate(t *testing.T) {
+func TestLintTemplateSuccessValidTemplateLowercaseInk(t *testing.T) {
 	result, _ := LintTemplateSuccess(filepath.Join("..", "testfiles", "template_1.txt.in"))
+	if result == false {
+		t.Errorf("[FAIL] LintTemplateSuccess returned false for a valid template, expected true.")
+	}
+}
+
+func TestLintTemplateSuccessValidTemplateUppercaseInk(t *testing.T) {
+	result, _ := LintTemplateSuccess(filepath.Join("..", "testfiles", "template_2.txt.in"))
 	if result == false {
 		t.Errorf("[FAIL] LintTemplateSuccess returned false for a valid template, expected true.")
 	}
