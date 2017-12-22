@@ -13,7 +13,7 @@ func TestLintTemplateSuccessValidTemplate(t *testing.T) {
 }
 
 func TestLintTemplateSuccessInvalidTemplate(t *testing.T) {
-	result, _ := LintTemplateSuccess(filepath.Join("..", "testfiles", "template_2.txt.in"))
+	result, _ := LintTemplateSuccess(filepath.Join("..", "testfiles", "template_invalid.txt.in"))
 	if result == true {
 		t.Errorf("[FAIL] LintTemplateSuccess returned true for an invalid template, expected false.")
 	}
