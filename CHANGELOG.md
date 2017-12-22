@@ -1,5 +1,10 @@
 ## Changelog
 
+### v0.5.0
+
+- added builtin template support for `{{ ink }}` template tags
+- added template linter support for `{{ ink }}` template tag validation
+
 ### v0.4.0
 
 - refactored entire approach to parallel template renders/file writes from stdin and command line argument defined template renders
