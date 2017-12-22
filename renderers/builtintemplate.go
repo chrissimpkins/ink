@@ -39,6 +39,8 @@ type ReplacementStrings struct {
 	Ink                                                       string
 }
 
+// InkmarkReplaceString is a global variable that holds the replacement string data to support the use of
+//  the {{ ink }} template tag as a built in value
 var InkmarkReplaceString = ""
 
 // RenderFromInkTemplate is a function that renders a text template on path templatePath with a user specified
