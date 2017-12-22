@@ -39,6 +39,8 @@ type ReplacementStrings struct {
 	Ink                                                       string
 }
 
+var InkmarkReplaceString = ""
+
 // RenderFromInkTemplate is a function that renders a text template on path templatePath with a user specified
 // replacement string replaceString (pointer to string) and returns pointer to rendered string and error
 func RenderFromInkTemplate(templatePath string, replaceString *string) (*string, error) {
@@ -49,9 +51,12 @@ func RenderFromInkTemplate(templatePath string, replaceString *string) (*string,
 		responseReadErr := fmt.Errorf("unable to read template file '%s'. %v", templatePath, readerr)
 		return &emptystring, responseReadErr
 	}
-	//funcs := template.FuncMap{"ink": ink}
-	//t, err := template.New("ink").Funcs(funcs).Parse(templateText)
-	t, err := template.New("ink").Parse(templateText)
+
+	// set global variable with replacement string variable (used to support `{{ ink }}` template tags via ink() function below)
+	InkmarkReplaceString = *replaceString
+	funcs := template.FuncMap{"ink": ink}
+	t, err := template.New("ink").Funcs(funcs).Parse(templateText)
+
 	if err != nil {
 		templateParseErr := fmt.Errorf("ink template '%s' could not be parsed. %v", templatePath, err)
 		return &emptystring, templateParseErr
@@ -80,3 +85,6 @@ func RenderFromInkTemplate(templatePath string, replaceString *string) (*string,
 	renderedString := buf.String()
 	return &renderedString, nil
 }
+
+// ink function supports use of the `ink` template tag as part of the builtin templating
+func ink() string { return InkmarkReplaceString }
