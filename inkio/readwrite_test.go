@@ -3,6 +3,7 @@ package inkio
 import (
 	"bytes"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -55,5 +56,29 @@ func TestWriteStringToStdOut(t *testing.T) {
 
 	if out != "this is a test" {
 		t.Errorf("[FAIL] Expected WriteString to return 'this is a test' to standard output stream when stdout requested, however the function returned '%s'", out)
+	}
+}
+
+func TestWriteStringToFile(t *testing.T) {
+	mockTemplatePath := "testing.txt.in"
+	mockOutPath := "testing.txt"
+	teststring := "this is a test"
+	err := WriteString(mockTemplatePath, false, &teststring)
+	if err != nil {
+		t.Errorf("[FAIL] There was an error with the file write for the TestWriteStringToFile test: %v", err)
+	}
+
+	if _, err := os.Stat(mockOutPath); !os.IsNotExist(err) {
+
+		readstring, err := ioutil.ReadFile(mockOutPath)
+		if err != nil {
+			t.Errorf("[FAIL] Unable to read expected text file %s in TestWriteStringToFile test. %v", mockOutPath, err)
+		}
+		if string(readstring) != teststring {
+			t.Errorf("[FAIL] Expected to read '%s' from test file and actually read '%s'", teststring, readstring)
+		}
+		os.Remove(mockOutPath)
+	} else {
+		t.Errorf("[FAIL] The expected file write for the TestWriteStringToFile test was not found. %v", err)
 	}
 }
