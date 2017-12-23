@@ -41,7 +41,7 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.5.0"
+	Version = "0.6.0dev0"
 
 	// Usage is the application usage string
 	Usage = "Usage: ink [options] [template path 1]...[template path n]\n"
@@ -230,14 +230,14 @@ func main() {
 		close(errorc)
 	}()
 
-	exitfail := false                   // flag to indicate that a failure occurred for appropriate exit status code on application exit
+	exitFail := false                   // flag to indicate that a failure occurred for appropriate exit status code on application exit
 	for errorOccurred := range errorc { // iterate through the booleans to determine if error occurred during execution
 		if errorOccurred == true {
-			exitfail = true
+			exitFail = true
 		}
 	}
 
-	if exitfail {
+	if exitFail {
 		os.Exit(1) // fail with exit status code 1 if error occurred during execution of any template renders
 	}
 
@@ -252,7 +252,7 @@ func main() {
 func renderIt(templatePath string, replaceString *string) error {
 	// if user specified --find flag with appropriate argument, perform user template rendering
 	if len(*findString) > 0 {
-		renderedStringPointer, rendererr := renderers.RenderFromUserTemplate(templatePath, findString, replaceString)
+		renderedStringPointer, rendererr := renderers.RenderFromLocalUserTemplate(templatePath, findString, replaceString)
 		if rendererr != nil {
 			return rendererr
 		}
@@ -263,7 +263,7 @@ func renderIt(templatePath string, replaceString *string) error {
 		return nil
 	}
 	// otherwise perform builtin template rendering
-	renderedStringPointer, rendererr := renderers.RenderFromInkTemplate(templatePath, replaceString)
+	renderedStringPointer, rendererr := renderers.RenderFromLocalInkTemplate(templatePath, replaceString)
 	if rendererr != nil {
 		return rendererr
 	}
