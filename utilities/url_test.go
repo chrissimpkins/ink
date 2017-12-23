@@ -51,3 +51,25 @@ func TestGetURLFilePathInkTemplateWithMultiQuery(t *testing.T) {
 		t.Errorf("[FAIL] Expected return of path 'inktemplate.txt.in', received: %s", response)
 	}
 }
+
+// when protocol is not included, still returns correct file path
+func TestGetURLFilePathInkTemplateNoProtocol(t *testing.T) {
+	response, err := GetURLFilePath("test.com/inktemplate.txt.in")
+	if err != nil {
+		t.Errorf("[FAIL] Did not expect error returned from GetURLFilePath for valid file, received: %v", err)
+	}
+	if response != "inktemplate.txt.in" {
+		t.Errorf("[FAIL] Expected return of path 'inktemplate.txt.in', received: %s", response)
+	}
+}
+
+// when protocol and path structure is not included, still returns correct file path
+func TestGetURLFilePathInkTemplateNoProtocolOrDirs(t *testing.T) {
+	response, err := GetURLFilePath("inktemplate.txt.in")
+	if err != nil {
+		t.Errorf("[FAIL] Did not expect error returned from GetURLFilePath for valid file, received: %v", err)
+	}
+	if response != "inktemplate.txt.in" {
+		t.Errorf("[FAIL] Expected return of path 'inktemplate.txt.in', received: %s", response)
+	}
+}
