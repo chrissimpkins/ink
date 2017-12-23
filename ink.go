@@ -36,12 +36,13 @@ import (
 
 	"github.com/chrissimpkins/ink/inkio"
 	"github.com/chrissimpkins/ink/renderers"
+	"github.com/chrissimpkins/ink/utilities"
 	"github.com/chrissimpkins/ink/validators"
 )
 
 const (
 	// Version is the application version string
-	Version = "0.6.0.dev3"
+	Version = "0.6.0.dev4"
 
 	// Usage is the application usage string
 	Usage = `Usage: ink [options] [template path 1]...[template path n]
@@ -112,10 +113,19 @@ func main() {
 		os.Exit(0)
 	}
 
-	// parse all non-flag arguments on the command line
+	// parse all non-flag arguments on the command line to string slice data elements
 	templatePaths := flag.Args()
+	var localTemplatePaths []string
+	var remoteTemplatePaths []string
 
-	// TODO: parse into local and remote template path slices, then add handling below
+	// parse by local and remote template paths
+	for _, templatePath := range templatePaths {
+		if strings.HasPrefix(templatePath, "http://") || strings.HasPrefix(templatePath, "https://") {
+			remoteTemplatePaths = append(remoteTemplatePaths, templatePath)
+		} else {
+			localTemplatePaths = append(localTemplatePaths, templatePath)
+		}
+	}
 
 	/*
 
@@ -123,7 +133,22 @@ func main() {
 
 	*/
 	commandlinefail := false
-	for _, templatePath := range templatePaths {
+
+	// confirm that the proper file extension is included on all local AND remote templates
+	// NOTE: skip check if user requests print to stdout stream as we assume they are going to manage outfile write path
+	//       themselves or do not need an outfile path (e.g. viewing in terminal)
+	// this extension formatting is used to construct the outfile path and should not be changed
+	if !*stdOutFlag {
+		for _, templatePath := range templatePaths {
+			if !validators.HasCorrectExtension(templatePath) {
+				os.Stderr.WriteString("[ink] ERROR: Argument '" + templatePath + "' is not a properly specified template with *.in file extension.\n")
+				commandlinefail = true
+			}
+
+		}
+	}
+	// confirm that local template file paths exist
+	for _, templatePath := range localTemplatePaths {
 		// test for existence of requested template file on user specified file path
 		fileexists, fileerr := validators.FileExists(templatePath)
 		if !fileexists {
@@ -132,13 +157,7 @@ func main() {
 			commandlinefail = true
 		}
 
-		// test that template file is properly specified with `*.in` extension
-		if !validators.HasCorrectExtension(templatePath) {
-			os.Stderr.WriteString("[ink] ERROR: Argument '" + templatePath + "' is not a properly specified template with *.in file extension.\n")
-			commandlinefail = true
-		}
 	}
-
 	// exit with status code 1 if any of the above command line validations failed
 	if commandlinefail {
 		os.Exit(1)
@@ -212,11 +231,12 @@ func main() {
 	var wg sync.WaitGroup
 
 	errorc := make(chan bool) // channel used to communicate render/write failures from go routines that are executing them
-	for _, templatePath := range templatePaths {
+	// Iterate through local templates and render them in parallel
+	for _, templatePath := range localTemplatePaths {
 		wg.Add(1)
 		go func(templatePath string, replaceString *string) {
 			defer wg.Done()
-			err := renderIt(templatePath, replaceString)
+			err := renderLocal(templatePath, replaceString)
 			if err != nil {
 				os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render template %s to file. %v\n", templatePath, err))
 				errorc <- true // true = error occurred
@@ -226,6 +246,23 @@ func main() {
 				fmt.Printf("[ink] Template %s rendered successfully.\n", templatePath)
 			}
 		}(templatePath, replaceString)
+	}
+
+	// Iterate through remote templates and render them in parallel
+	for _, templateURL := range remoteTemplatePaths {
+		wg.Add(1)
+		go func(templateURL string, replaceString *string) {
+			defer wg.Done()
+			err := renderRemote(templateURL, replaceString)
+			if err != nil {
+				os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render remote template %s to file. %v\n", templateURL, err))
+				errorc <- true // true = error occurred
+			}
+			errorc <- false
+			if !*stdOutFlag && err == nil {
+				fmt.Printf("[ink] Template %s rendered successfully.\n", templateURL)
+			}
+		}(templateURL, replaceString)
 	}
 
 	// must make the wait and close concurrent with the executing worker go routines
@@ -253,7 +290,8 @@ func main() {
 	}
 }
 
-func renderIt(templatePath string, replaceString *string) error {
+// renderLocal handles local template file rendering, called in parallel fashion from main function
+func renderLocal(templatePath string, replaceString *string) error {
 	// if user specified --find flag with appropriate argument, perform user template rendering
 	if len(*findString) > 0 {
 		renderedStringPointer, rendererr := renderers.RenderFromLocalUserTemplate(templatePath, findString, replaceString)
@@ -270,6 +308,40 @@ func renderIt(templatePath string, replaceString *string) error {
 	renderedStringPointer, rendererr := renderers.RenderFromLocalInkTemplate(templatePath, replaceString)
 	if rendererr != nil {
 		return rendererr
+	}
+	writeerr := inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
+	if writeerr != nil {
+		return writeerr
+	}
+	return nil
+}
+
+// renderRemote handles remote template file rendering, called in parallel fashion from main function
+func renderRemote(templateURL string, replaceString *string) error {
+	// if user specified --find flag with appropriate argument, perform user template rendering
+	if len(*findString) > 0 {
+		renderedStringPointer, rendererr := renderers.RenderFromRemoteUserTemplate(templateURL, findString, replaceString)
+		if rendererr != nil {
+			return rendererr
+		}
+		templatePath, urlerr := utilities.GetURLFilePath(templateURL)
+		if urlerr != nil {
+			return urlerr
+		}
+		writeerr := inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
+		if writeerr != nil {
+			return writeerr
+		}
+		return nil
+	}
+	// otherwise perform builtin template rendering
+	renderedStringPointer, rendererr := renderers.RenderFromRemoteInkTemplate(templateURL, replaceString)
+	if rendererr != nil {
+		return rendererr
+	}
+	templatePath, urlerr := utilities.GetURLFilePath(templateURL)
+	if urlerr != nil {
+		return urlerr
 	}
 	writeerr := inkio.WriteString(templatePath, *stdOutFlag, renderedStringPointer)
 	if writeerr != nil {
