@@ -41,10 +41,12 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.6.0dev3"
+	Version = "0.6.0.dev3"
 
 	// Usage is the application usage string
-	Usage = "Usage: ink [options] [template path 1]...[template path n]\n"
+	Usage = `Usage: ink [options] [template path 1]...[template path n]
+       ink [options] [template URL 1] ...[template URL n]
+`
 
 	// Help is the application help string
 	Help = "=================================================\n" +
