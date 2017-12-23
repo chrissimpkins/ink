@@ -46,7 +46,7 @@ const (
 
 	// Usage is the application usage string
 	Usage = `Usage: ink [options] [template path 1]...[template path n]
-       ink [options] [template URL 1] ...[template URL n]
+       ink [options] [template URL 1 ]...[template URL n ]
 `
 
 	// Help is the application help string
