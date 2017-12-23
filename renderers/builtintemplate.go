@@ -64,7 +64,7 @@ func RenderFromLocalInkTemplate(templatePath string, replaceStringPointer *strin
 	return renderedStringPointer, rendererr
 }
 
-// RenderFromRemoteTemplate is a function that renders a text template at URL templateURL with a user specified
+// RenderFromRemoteInkTemplate is a function that renders a text template at URL templateURL with a user specified
 // replacement string replaceStringPointer (pointer to string) and returns pointer to rendered string and error
 func RenderFromRemoteInkTemplate(templateURL string, replaceStringPointer *string) (*string, error) {
 	templateText, geterr := inkio.GetRequest(templateURL)
