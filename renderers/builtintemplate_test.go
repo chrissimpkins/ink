@@ -5,7 +5,11 @@ import (
 	"testing"
 )
 
-func TestRenderBuiltinLowercaseInkTag(t *testing.T) {
+/*
+ LOCAL TEMPLATE TESTS
+*/
+
+func TestRenderBuiltinLowercaseInkTagLocal(t *testing.T) {
 	tests := []struct {
 		templatepath string
 		replacement  string
@@ -27,7 +31,7 @@ func TestRenderBuiltinLowercaseInkTag(t *testing.T) {
 	}
 }
 
-func TestRenderBuiltinUppercaseInkTag(t *testing.T) {
+func TestRenderBuiltinUppercaseInkTagLocal(t *testing.T) {
 	tests := []struct {
 		templatepath string
 		replacement  string
@@ -49,10 +53,66 @@ func TestRenderBuiltinUppercaseInkTag(t *testing.T) {
 	}
 }
 
-func TestRenderBuiltinBadFilePathRaisesError(t *testing.T) {
+func TestRenderBuiltinBadLocalFilePathRaisesError(t *testing.T) {
 	replacestring := "testing"
 	_, err := RenderFromLocalInkTemplate("completelybogus.txt.in", &replacestring)
 	if err == nil {
 		t.Errorf("[FAIL] Expected error to be raised for invalid file path and the error value was 'nil'")
+	}
+}
+
+/*
+REMOTE TEMPLATE TESTS
+*/
+
+func TestRenderBuiltinLowercaseInkTagRemote(t *testing.T) {
+	tests := []struct {
+		templateurl string
+		replacement string
+		expected    string
+	}{
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_1.txt.in", "abcd123", "sha=abcd123 test=abcd123"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_1.txt.in", "åß∂ƒç√∫", "sha=åß∂ƒç√∫ test=åß∂ƒç√∫"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_1.txt.in", "饂饂饂饂", "sha=饂饂饂饂 test=饂饂饂饂"},
+	}
+
+	for _, testcase := range tests {
+		haystack, err := RenderFromRemoteInkTemplate(testcase.templateurl, &testcase.replacement)
+		if err != nil {
+			t.Errorf("[FAIL] RenderFromInkTemplate execution returned error value: %v", err)
+		}
+		if *haystack != testcase.expected {
+			t.Errorf("[FAIL] Expected rendered template value = '%s' and received rendered template value '%s'", testcase.expected, *haystack)
+		}
+	}
+}
+
+func TestRenderBuiltinUppercaseInkTagRemote(t *testing.T) {
+	tests := []struct {
+		templateurl string
+		replacement string
+		expected    string
+	}{
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_2.txt.in", "abcd123", "sha=abcd123 test=abcd123"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_2.txt.in", "åß∂ƒç√∫", "sha=åß∂ƒç√∫ test=åß∂ƒç√∫"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_2.txt.in", "饂饂饂饂", "sha=饂饂饂饂 test=饂饂饂饂"},
+	}
+
+	for _, testcase := range tests {
+		haystack, err := RenderFromRemoteInkTemplate(testcase.templateurl, &testcase.replacement)
+		if err != nil {
+			t.Errorf("[FAIL] RenderFromInkTemplate execution returned error value: %v", err)
+		}
+		if *haystack != testcase.expected {
+			t.Errorf("[FAIL] Expected rendered template value = '%s' and received rendered template value '%s'", testcase.expected, *haystack)
+		}
+	}
+}
+
+func TestRenderBuiltinBadURLRaisesError(t *testing.T) {
+	replacestring := "testing"
+	_, err := RenderFromRemoteInkTemplate("https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/completelybogus.txt.in", &replacestring)
+	if err == nil {
+		t.Errorf("[FAIL] Expected error to be raised for invalid URL and the error value was 'nil'")
 	}
 }

@@ -44,20 +44,41 @@ type ReplacementStrings struct {
 var InkmarkReplaceString = ""
 
 // RenderFromLocalInkTemplate is a function that renders a text template on path templatePath with a user specified
-// replacement string replaceString (pointer to string) and returns pointer to rendered string and error
+// replacement string replaceStringPointer (pointer to string) and returns pointer to rendered string and error
 func RenderFromLocalInkTemplate(templatePath string, replaceStringPointer *string) (*string, error) {
 	templateText, readerr := inkio.ReadFileToString(templatePath)
 	emptystring := "" // returned with errors
 
 	if readerr != nil {
-		responseReadErr := fmt.Errorf("unable to read template file '%s'. %v", templatePath, readerr)
+		responseReadErr := fmt.Errorf("unable to read local template file '%s'. %v", templatePath, readerr)
 		return &emptystring, responseReadErr
 	}
 
 	renderedStringPointer, rendererr := renderTemplate(&templateText, replaceStringPointer)
 
 	if rendererr != nil {
-		templateRenderErr := fmt.Errorf("unable to render template file '%s'. %v", templatePath, rendererr)
+		templateRenderErr := fmt.Errorf("unable to render local template file '%s'. %v", templatePath, rendererr)
+		return &emptystring, templateRenderErr
+	}
+
+	return renderedStringPointer, rendererr
+}
+
+// RenderFromRemoteTemplate is a function that renders a text template at URL templateURL with a user specified
+// replacement string replaceStringPointer (pointer to string) and returns pointer to rendered string and error
+func RenderFromRemoteInkTemplate(templateURL string, replaceStringPointer *string) (*string, error) {
+	templateText, geterr := inkio.GetRequest(templateURL)
+	emptystring := "" //returned with errors
+
+	if geterr != nil {
+		responseGetErr := fmt.Errorf("unable to perform GET request for remote template file '%s'. %v", templateURL, geterr)
+		return &emptystring, responseGetErr
+	}
+
+	renderedStringPointer, rendererr := renderTemplate(&templateText, replaceStringPointer)
+
+	if rendererr != nil {
+		templateRenderErr := fmt.Errorf("unable to render remote template pulled by GET request from '%s'. %v", templateURL, rendererr)
 		return &emptystring, templateRenderErr
 	}
 
