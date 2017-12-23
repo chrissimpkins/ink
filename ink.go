@@ -41,7 +41,7 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.6.0dev2"
+	Version = "0.6.0dev3"
 
 	// Usage is the application usage string
 	Usage = "Usage: ink [options] [template path 1]...[template path n]\n"
@@ -112,6 +112,8 @@ func main() {
 
 	// parse all non-flag arguments on the command line
 	templatePaths := flag.Args()
+
+	// TODO: parse into local and remote template path slices, then add handling below
 
 	/*
 
