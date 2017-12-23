@@ -41,7 +41,7 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.6.0dev1"
+	Version = "0.6.0dev2"
 
 	// Usage is the application usage string
 	Usage = "Usage: ink [options] [template path 1]...[template path n]\n"

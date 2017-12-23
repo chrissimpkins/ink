@@ -54,7 +54,7 @@ func RenderFromLocalInkTemplate(templatePath string, replaceStringPointer *strin
 		return &emptystring, responseReadErr
 	}
 
-	renderedStringPointer, rendererr := renderTemplate(&templateText, replaceStringPointer)
+	renderedStringPointer, rendererr := renderInkTemplate(&templateText, replaceStringPointer)
 
 	if rendererr != nil {
 		templateRenderErr := fmt.Errorf("unable to render local template file '%s'. %v", templatePath, rendererr)
@@ -75,7 +75,7 @@ func RenderFromRemoteInkTemplate(templateURL string, replaceStringPointer *strin
 		return &emptystring, responseGetErr
 	}
 
-	renderedStringPointer, rendererr := renderTemplate(&templateText, replaceStringPointer)
+	renderedStringPointer, rendererr := renderInkTemplate(&templateText, replaceStringPointer)
 
 	if rendererr != nil {
 		templateRenderErr := fmt.Errorf("unable to render remote template pulled by GET request from '%s'. %v", templateURL, rendererr)
@@ -87,7 +87,7 @@ func RenderFromRemoteInkTemplate(templateURL string, replaceStringPointer *strin
 
 // renderTemplate handles renders of the template text replacements for local and remote template files and returns
 // a pointer to the rendered template string + error
-func renderTemplate(templateText *string, replaceString *string) (*string, error) {
+func renderInkTemplate(templateText *string, replaceString *string) (*string, error) {
 	// set global variable with replacement string variable (used to support `{{ ink }}` template tags via ink() function below)
 	InkmarkReplaceString = *replaceString
 	emptystring := ""

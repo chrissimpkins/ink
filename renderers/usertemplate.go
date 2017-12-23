@@ -32,7 +32,7 @@ import (
 	"github.com/chrissimpkins/ink/inkio"
 )
 
-// RenderFromUserTemplate is a function that renders a text template file on the path templatePath to
+// RenderFromLocalUserTemplate is a function that renders a text template file on the path templatePath to
 // a rendered string using the findString string pointer replacement target substring with the
 // replaceString string pointer replacement substring
 func RenderFromLocalUserTemplate(templatePath string, findString *string, replaceString *string) (*string, error) {
@@ -40,12 +40,46 @@ func RenderFromLocalUserTemplate(templatePath string, findString *string, replac
 	emptystring := "" // returned with errors
 
 	if readerr != nil {
-		responseReadErr := fmt.Errorf("[ink] ERROR: unable to read template file '%s'. %v", templatePath, readerr)
+		responseReadErr := fmt.Errorf("unable to read local template file '%s'. %v", templatePath, readerr)
 		return &emptystring, responseReadErr
 	}
 
+	renderedStringPointer, rendererr := renderUserTemplate(&templateText, findString, replaceString)
+
+	if rendererr != nil {
+		renderErr := fmt.Errorf("unable to render local template file '%s'. %v", templatePath, rendererr)
+		return &emptystring, renderErr
+	}
+	return renderedStringPointer, rendererr
+
+}
+
+// RenderFromRemoteUserTemplate is a function that renders a text template at the URL templateURL to
+// a rendered string using the findString string pointer replacement target substring with the
+// replaceString string pointer replacement substring
+func RenderFromRemoteUserTemplate(templateURL string, findString *string, replaceString *string) (*string, error) {
+	templateText, geterr := inkio.GetRequest(templateURL)
+	emptystring := "" // returned with errors
+
+	if geterr != nil {
+		responseReadErr := fmt.Errorf("unable to perform GET request for remote template file '%s'. %v", templateURL, geterr)
+		return &emptystring, responseReadErr
+	}
+
+	renderedStringPointer, rendererr := renderUserTemplate(&templateText, findString, replaceString)
+
+	if rendererr != nil {
+		renderErr := fmt.Errorf("unable to render remote template file '%s'. %v", templateURL, rendererr)
+		return &emptystring, renderErr
+	}
+	return renderedStringPointer, rendererr
+}
+
+// renderUserTemplate is a function that performs the text string replacements in user templates across both
+// local and remote template files
+func renderUserTemplate(templateText *string, findString *string, replaceString *string) (*string, error) {
 	// replace all instances of user specified template findString with user specified replaceString
-	renderedString := strings.Replace(templateText, *findString, *replaceString, -1)
+	renderedString := strings.Replace(*templateText, *findString, *replaceString, -1)
 
 	return &renderedString, nil
 }
