@@ -43,9 +43,9 @@ type ReplacementStrings struct {
 //  the {{ ink }} template tag as a built in value
 var InkmarkReplaceString = ""
 
-// RenderFromInkTemplate is a function that renders a text template on path templatePath with a user specified
+// RenderFromLocalInkTemplate is a function that renders a text template on path templatePath with a user specified
 // replacement string replaceString (pointer to string) and returns pointer to rendered string and error
-func RenderFromInkTemplate(templatePath string, replaceString *string) (*string, error) {
+func RenderFromLocalInkTemplate(templatePath string, replaceStringPointer *string) (*string, error) {
 	templateText, readerr := inkio.ReadFileToString(templatePath)
 	emptystring := "" // returned with errors
 
@@ -54,14 +54,27 @@ func RenderFromInkTemplate(templatePath string, replaceString *string) (*string,
 		return &emptystring, responseReadErr
 	}
 
+	renderedStringPointer, rendererr := renderTemplate(&templateText, replaceStringPointer)
+
+	if rendererr != nil {
+		templateRenderErr := fmt.Errorf("unable to render template file '%s'. %v", templatePath, rendererr)
+		return &emptystring, templateRenderErr
+	}
+
+	return renderedStringPointer, rendererr
+}
+
+// renderTemplate handles renders of the template text replacements for local and remote template files and returns
+// a pointer to the rendered template string + error
+func renderTemplate(templateText *string, replaceString *string) (*string, error) {
 	// set global variable with replacement string variable (used to support `{{ ink }}` template tags via ink() function below)
 	InkmarkReplaceString = *replaceString
+	emptystring := ""
 	funcs := template.FuncMap{"ink": ink}
-	t, err := template.New("ink").Funcs(funcs).Parse(templateText)
+	t, err := template.New("ink").Funcs(funcs).Parse(*templateText)
 
 	if err != nil {
-		templateParseErr := fmt.Errorf("ink template '%s' could not be parsed. %v", templatePath, err)
-		return &emptystring, templateParseErr
+		return &emptystring, err
 	}
 
 	r := ReplacementStrings{
@@ -80,8 +93,7 @@ func RenderFromInkTemplate(templatePath string, replaceString *string) (*string,
 	buf := new(bytes.Buffer)
 	executeerr := t.Execute(buf, r)
 	if executeerr != nil {
-		templateRenderErr := fmt.Errorf("while executing template '%s' encountered error: %v", templatePath, executeerr)
-		return &emptystring, templateRenderErr
+		return &emptystring, executeerr
 	}
 
 	renderedString := buf.String()

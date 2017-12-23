@@ -18,7 +18,7 @@ func TestRenderUserBrackets(t *testing.T) {
 	}
 
 	for _, testcase := range tests {
-		haystack, err := RenderFromUserTemplate(testcase.templatepath, &testcase.find, &testcase.replacement)
+		haystack, err := RenderFromLocalUserTemplate(testcase.templatepath, &testcase.find, &testcase.replacement)
 		if err != nil {
 			t.Errorf("[FAIL] RenderFromInkTemplate execution returned error value: %v", err)
 		}
@@ -31,7 +31,7 @@ func TestRenderUserBrackets(t *testing.T) {
 func TestRenderUserBadFilePathRaisesError(t *testing.T) {
 	replacestring := "testing"
 	findstring := "[[user]]"
-	_, err := RenderFromUserTemplate("completelybogus.txt.in", &findstring, &replacestring)
+	_, err := RenderFromLocalUserTemplate("completelybogus.txt.in", &findstring, &replacestring)
 	if err == nil {
 		t.Errorf("[FAIL] Expected error to be raised for invalid file path and the error value was 'nil'")
 	}

@@ -17,7 +17,7 @@ func TestRenderBuiltinLowercaseInkTag(t *testing.T) {
 	}
 
 	for _, testcase := range tests {
-		haystack, err := RenderFromInkTemplate(testcase.templatepath, &testcase.replacement)
+		haystack, err := RenderFromLocalInkTemplate(testcase.templatepath, &testcase.replacement)
 		if err != nil {
 			t.Errorf("[FAIL] RenderFromInkTemplate execution returned error value: %v", err)
 		}
@@ -39,7 +39,7 @@ func TestRenderBuiltinUppercaseInkTag(t *testing.T) {
 	}
 
 	for _, testcase := range tests {
-		haystack, err := RenderFromInkTemplate(testcase.templatepath, &testcase.replacement)
+		haystack, err := RenderFromLocalInkTemplate(testcase.templatepath, &testcase.replacement)
 		if err != nil {
 			t.Errorf("[FAIL] RenderFromInkTemplate execution returned error value: %v", err)
 		}
@@ -51,7 +51,7 @@ func TestRenderBuiltinUppercaseInkTag(t *testing.T) {
 
 func TestRenderBuiltinBadFilePathRaisesError(t *testing.T) {
 	replacestring := "testing"
-	_, err := RenderFromInkTemplate("completelybogus.txt.in", &replacestring)
+	_, err := RenderFromLocalInkTemplate("completelybogus.txt.in", &replacestring)
 	if err == nil {
 		t.Errorf("[FAIL] Expected error to be raised for invalid file path and the error value was 'nil'")
 	}

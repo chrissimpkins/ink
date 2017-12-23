@@ -35,7 +35,7 @@ import (
 // RenderFromUserTemplate is a function that renders a text template file on the path templatePath to
 // a rendered string using the findString string pointer replacement target substring with the
 // replaceString string pointer replacement substring
-func RenderFromUserTemplate(templatePath string, findString *string, replaceString *string) (*string, error) {
+func RenderFromLocalUserTemplate(templatePath string, findString *string, replaceString *string) (*string, error) {
 	templateText, readerr := inkio.ReadFileToString(templatePath)
 	emptystring := "" // returned with errors
 
