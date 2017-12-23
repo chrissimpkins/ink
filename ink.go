@@ -234,9 +234,9 @@ func main() {
 	// Iterate through local templates and render them in parallel
 	for _, templatePath := range localTemplatePaths {
 		wg.Add(1)
-		go func(templatePath string, replaceString *string) {
+		go func(templatePath string, replaceString *string, stdOutFlag *bool) {
 			defer wg.Done()
-			err := renderLocal(templatePath, replaceString)
+			err := renderLocal(templatePath, replaceString, stdOutFlag)
 			if err != nil {
 				os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render template %s to file. %v\n", templatePath, err))
 				errorc <- true // true = error occurred
@@ -245,15 +245,15 @@ func main() {
 			if !*stdOutFlag && err == nil { // print confirmation only if the user did not print to render to stdout stream
 				fmt.Printf("[ink] Template %s rendered successfully.\n", templatePath)
 			}
-		}(templatePath, replaceString)
+		}(templatePath, replaceString, stdOutFlag)
 	}
 
 	// Iterate through remote templates and render them in parallel
 	for _, templateURL := range remoteTemplatePaths {
 		wg.Add(1)
-		go func(templateURL string, replaceString *string) {
+		go func(templateURL string, replaceString *string, stdOutFlag *bool) {
 			defer wg.Done()
-			err := renderRemote(templateURL, replaceString)
+			err := renderRemote(templateURL, replaceString, stdOutFlag)
 			if err != nil {
 				os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render remote template %s to file. %v\n", templateURL, err))
 				errorc <- true // true = error occurred
@@ -262,7 +262,7 @@ func main() {
 			if !*stdOutFlag && err == nil {
 				fmt.Printf("[ink] Template %s rendered successfully.\n", templateURL)
 			}
-		}(templateURL, replaceString)
+		}(templateURL, replaceString, stdOutFlag)
 	}
 
 	// must make the wait and close concurrent with the executing worker go routines
@@ -291,7 +291,7 @@ func main() {
 }
 
 // renderLocal handles local template file rendering, called in parallel fashion from main function
-func renderLocal(templatePath string, replaceString *string) error {
+func renderLocal(templatePath string, replaceString *string, stdOutFlag *bool) error {
 	// if user specified --find flag with appropriate argument, perform user template rendering
 	if len(*findString) > 0 {
 		renderedStringPointer, rendererr := renderers.RenderFromLocalUserTemplate(templatePath, findString, replaceString)
@@ -317,7 +317,7 @@ func renderLocal(templatePath string, replaceString *string) error {
 }
 
 // renderRemote handles remote template file rendering, called in parallel fashion from main function
-func renderRemote(templateURL string, replaceString *string) error {
+func renderRemote(templateURL string, replaceString *string, stdOutFlag *bool) error {
 	// if user specified --find flag with appropriate argument, perform user template rendering
 	if len(*findString) > 0 {
 		renderedStringPointer, rendererr := renderers.RenderFromRemoteUserTemplate(templateURL, findString, replaceString)
