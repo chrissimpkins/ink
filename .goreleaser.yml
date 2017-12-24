@@ -22,6 +22,9 @@ builds:
   - "386"
   - arm
   - arm64
+  ignore:
+    - goos: darwin
+      goarch: 386
   main: .
   ldflags: -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
   binary: ink
