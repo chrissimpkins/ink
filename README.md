@@ -107,7 +107,7 @@ After execution of the above command, the rendered CSS file with git commit SHA1
 
 ## Installation
 
-### Approach 1: Install the binary executable file
+### Approach 1: Install the pre-compiled binary executable file
 
 Download the latest compiled release file for your operating system and architecture from [the Releases page](https://github.com/chrissimpkins/ink/releases/latest).
 
@@ -137,5 +137,19 @@ Once you have installed Go and configured your settings so that Go executables a
 $ go get github.com/chrissimpkins/ink
 ```
 
+## Usage
 
+### Syntax
+
+#### Local template files
+
+```
+$ ink [options] [template path 1]...[template path n]
+```
+
+#### Remote template files
+
+```
+$ ink [options] [template URL 1]...[template URL n]
+```
 
