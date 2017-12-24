@@ -1,5 +1,14 @@
 ## Changelog
 
+### v0.6.0
+
+- added support for parallel rendering of remote templates that are accessible via GET requests (includes builtin and user defined formats)
+- added utilities/url.go utilities package module with URL file path parsing function
+- refactored template file extension validation to only run when `--stdout` flag is not specified.  Assume user is going to manage outfile path (or does not need it) when this flag is used.
+- updated usage string
+- updated help string
+- added new `build.sh` cross-platform compiler shell script
+
 ### v0.5.0
 
 - added builtin template support for `{{ ink }}` template tags
@@ -14,23 +23,23 @@
 
 ### v0.3.1
 
-- [main] added standard input stream error handling
+- added standard input stream error handling
 
 ### v0.3.0
 
-- added support for parallel template rendering
+- added support for parallel local template rendering
 - added support for concurrent template writes
 
 ### v0.2.1
 
-- [main] added `--help` documentation with all available options
+- added `--help` documentation with all available options
 
 ### v0.2.0
 
-- [main] added support for line filter functionality (i.e. pipe replacement string through std input stream from another command)
-- [main] added new `--trimnl` option to remove newline value from replacement string
-- [main] refactored ink.go source file template rendering handling to a new function
-- [validators] added new standard input stream validator function
+- added support for line filter functionality (i.e. pipe replacement string through std input stream from another command)
+- added new `--trimnl` option to remove newline value from replacement string
+- refactored ink.go source file template rendering handling to a new function
+- added new standard input stream validator function
 
 
 ### v0.1.0
