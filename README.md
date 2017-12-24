@@ -5,7 +5,7 @@
 
 # What is ink?
 
-ink is an open source command line text file renderer that is built with Go. The ink executable is compiled for use on [Linux, macOS, and Windows platforms]((https://github.com/chrissimpkins/ink/releases/latest)).  It was designed to provide a simple approach to get your command line executable text data into pre-formatted text files.
+ink is an open source command line text file template renderer that is built with Go. The ink executable is compiled for use on [Linux, macOS, and Windows platforms]((https://github.com/chrissimpkins/ink/releases/latest)).  It was designed to provide a simple approach to get your command line executable text data into pre-formatted text files.
 
 It features:
 
@@ -105,7 +105,37 @@ After execution of the above command, the rendered CSS file with git commit SHA1
 
 ```
 
+## Installation
 
+### Approach 1: Install the binary executable file
+
+Download the latest compiled release file for your operating system and architecture from [the Releases page](https://github.com/chrissimpkins/ink/releases/latest).
+
+#### Linux / macOS
+
+Unpack the tar.gz archive and move the `ink` executable file to your `/usr/local/bin` directory by executing the following command in the root of the unpacked archive:
+
+```
+$ mv ink /usr/local/bin/ink
+```
+
+There are no dependencies contained in the archive.  You can delete all downloaded archive files after the above step.
+
+#### Windows
+
+Unpack the zip archive and move the `ink.exe` executable file to a directory on your system PATH. See [details here](https://stackoverflow.com/questions/4822400/register-an-exe-so-you-can-run-it-from-any-command-line-in-windows) for more information about how to do this.
+
+There are no dependencies contained in the archive.  You can delete all downloaded archive files after the above step.
+
+### Approach 2: Compile from the source code and install
+
+You must install the Go programming language (which includes the `go` tool) in order to compile the project from source.  Follow the [instructions on the Go download page](https://golang.org/dl/) for your platform. 
+
+Once you have installed Go and configured your settings so that Go executables are installed on your system PATH, use the following command to (1) pull the master branch of the ink repository; (2) compile the ink executable from source for your platform/architecture configuration; (3) install the executable on your system:
+
+```
+$ go get github.com/chrissimpkins/ink
+```
 
 
 
