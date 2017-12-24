@@ -39,9 +39,9 @@ archive:
     darwin: macOS
     linux: Linux
     windows: Windows
-format_overrides:
-  - goos: windows
-    format: zip
+  format_overrides:
+    - goos: windows
+      format: zip
 #fpm:
 #  bindir: /usr/local/bin
 snapshot:
