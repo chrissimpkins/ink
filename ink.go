@@ -42,7 +42,7 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.6.0.dev5"
+	Version = "0.6.0"
 
 	// Usage is the application usage string
 	Usage = `Usage: ink [options] [template path 1]...[template path n]
@@ -57,7 +57,8 @@ const (
 		" Source: https://github.com/chrissimpkins/ink\n" +
 		"=================================================\n\n" +
 		" Usage:\n" +
-		"  $ ink [options] [template path 1]...[template path n]\n\n" +
+		"  $ ink [options] [template path 1]...[template path n]\n" +
+		"  $ ink [options] [template URL 1 ]...[template URL n ]\n\n" +
 		" Options:\n" +
 		"     --find=          Find string value for template render\n" +
 		" -h, --help           Application help\n" +
