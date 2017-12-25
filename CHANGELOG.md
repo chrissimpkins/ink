@@ -1,5 +1,14 @@
 ## Changelog
 
+### v0.6.2
+
+- added appveyor.yml settings file
+- added Appveyor Windows platform testing x i386 + x86_64 architectures
+
+### v0.6.1
+
+- modified .goreleaser.yml script: eliminated macOS builds x i386 architecture
+
 ### v0.6.0
 
 - added support for parallel rendering of remote templates that are accessible via GET requests (includes builtin and user defined formats)
