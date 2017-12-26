@@ -272,10 +272,11 @@ User-defined templates are specified as follows:
 - Templates files MUST NOT use two adjacent `{` glyphs as the opening delimiter and two adjacent `}` glyphs as the closing delimiter in template tokens.
 - Template files that are rendered to outfiles MUST be defined by a path that includes the intended file path of the rendered text outfile with the addition of the extension `.in`.
 - Template files that are used to pipe rendered text data to the standard output stream do not have a specified source file path format.  Users may define any local or remote path when the `--stdout` option is used.  The addition of a `.in` extension to the desired render artifact file path for these template files is RECOMMENDED when file writes are performed with these streamed data.
-- All template token glyphs in the order and case-sensitive definition specified on the command line MUST be replaced with the replacement text. 
+- All template token glyphs in the order and case-sensitive definition specified on the command line MUST be replaced with the replacement text during each execution of the renderer. 
 - All template tokens contained in template files MUST be replaced with replacement text during each execution of the renderer.
 
 
+## License
 
-
+[MIT License](https://github.com/chrissimpkins/ink/blob/master/LICENSE)
 
