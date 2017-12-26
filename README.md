@@ -1,5 +1,5 @@
 # <img src="https://raw.githubusercontent.com/chrissimpkins/ink/images/img/ink-logo-crunch.png">
-### A fast, flexible stream editor and text file template renderer
+### A fast, flexible stream editor and text template renderer
 
 [![Build Status](https://semaphoreci.com/api/v1/sourcefoundry/ink/branches/master/badge.svg)](https://semaphoreci.com/sourcefoundry/ink) [![Build status](https://ci.appveyor.com/api/projects/status/21si0rtxx9q36cad/branch/master?svg=true)](https://ci.appveyor.com/project/chrissimpkins/ink/branch/master) [![Go Report Card](https://goreportcard.com/badge/github.com/chrissimpkins/ink)](https://goreportcard.com/report/github.com/chrissimpkins/ink)
 
@@ -12,7 +12,7 @@ It features:
 - line filter stream editor support (pipe replacement text from other applications to ink, render your template with the standard input piped text, then pipe the rendered text to the standard output stream for file writes or further text processing)
 - support for parallel multi-file text replacements from local and remotely stored (GET request accessible) templates
 - a simple built-in text template format using `{{ ink }}` text labels
-- extremely flexible user defined text template formatting that supports *any text replacement label*™ that you'd like to use (you define it on the command line)
+- extremely flexible user defined text template formatting that supports *nearly any text replacement label*™ that you'd like to use.  This is defined at rendering time on the command line.
 
 ### Example
 
@@ -171,7 +171,7 @@ $ [executable command stdout stream] | ink [options] [template URL 1]...[templat
 
 #### Stream editor text substitutions
 
-The stream editor approach supports user-defined text replacement sites in the source document. This permits you to define alternate template tags in pre-formatted files and to use ink as a stream editor for routine find/replace text substitutions in the source document.
+The stream editor approach supports user-defined text replacement tokens in the source document. This permits you to define alternate template tokens in pre-formatted files and render template replacements as you would with template files that follow the ink template specification.  This approach also permits use of ink as a stream editor for routine find/replace text substitutions in the source document.
 
 ```
 $ ink --find=[find string] --replace=[replacement string] [options] [template path 1]...[template path n]
@@ -191,14 +191,14 @@ You can create a pipeline from ink to additional applications (or define your ow
 
 - `--find=` : find string value for user defined templates
 - `-h, --help` : application help
-- `--lint` : lint a template file for validity
+- `--lint` : lint a template file for validity using the ink template file specification
 - `--replace=` : replacement string value for template renders
 - `--stdout` : write rendered text to standard output stream
 - `--trimnl` : trim newline value from replacement string (intended for use with data piped through stdin stream)
 - `--usage` : application usage
 - `-v, --version` : application version
 
-### How to define a replacement string
+### How to define a replacement string on the command line
 
 The replacement text for your template file can either be piped to `ink` through the standard input stream or you can include the `--replace=[replacement string]` option in the command.  These are mutually exclusive and one of the two approaches is mandatory with each command.
 
@@ -244,20 +244,38 @@ Some command line executables include a newline character following the standard
 $ echo "abcd123" | ink --trimnl template.txt.in
 ```
  
-## Templates
+## Template File Specifications
+
+"Template file" is defined as any local or remote text file that is used as the source for text substitutions by inclusion of text replacement "tokens" in the document.
+
+"Token" is defined as the set of glyphs, in user defined order, that are defined as intended for text substitution within "template files".
+
+"Replacement text" is defined as the text intended for substitution at the site of a "token" in a template file.
+
+"Outfile" is defined as a text file path that is the rendering artifact of the `ink` executable.  Note that this is intentionally distinct from a user specified file write during command line execution using shell idioms or other modalities.
 
 ### ink template specification
 
 The ink template file is specified as follows:
 
-- Local and remote template files that are rendered to text file by ink MUST be defined by a path that includes the intended file path of the rendered text outfile with the addition of the extension `.in`.
-- Local and remote template files that are used to pipe rendered text data to the standard output stream do not have a specified file path format.  Users may define any local or remote path when the `--stdout` option is used.  The addition of a `.in` extension to the desired outfile path for these template files is RECOMMENDED when file writes are performed with these data.
-- The template MAY include template text replacement site tags that are defined as `{{ink}}` or `{{ ink }}`.
-- The template MAY include template text replacement site tags that are defined as `{{.Ink}}` or `{{ .Ink }}`.
-- ink MUST replace all characters up to and including the initial `{` and final `}` glyphs in the template text replacement site tags.
-- ink MUST replace all template text replacement site tags in template files during each execution.
+- Template files that are rendered to outfiles MUST be defined by a path that includes the intended file path of the outfile with the addition of the extension `.in`.
+- Template files that are used to pipe rendered text data to the standard output stream do not have a specified file path format.  Users may define any local or remote path when the `--stdout` option is used.  The addition of a `.in` extension to the desired render artifact file path for these template files is RECOMMENDED when file writes are performed with these streamed data.
+- The template MAY include zero or more template tokens that are defined in a case-sensitive manner as `{{ink}}` or `{{ ink }}`.
+- The template MAY include zero or more template tokens that are defined in a case-sensitive manner as `{{.Ink}}` or `{{ .Ink }}`.
+- All template token glyphs up to and including the initial `{` and final `}` glyphs MUST be replaced with replacement text during each execution of the renderer.
+- All template tokens contained in template files MUST be replaced with replacement text during each execution of the renderer.
 
-### User-defined templates
+### User-defined template specification
 
-- TODO
+User-defined templates are specified as follows:
+
+- Templates files MUST NOT use two adjacent `{` glyphs as the opening delimiter and two adjacent `}` glyphs as the closing delimiter in template tokens.
+- Template files that are rendered to outfiles MUST be defined by a path that includes the intended file path of the rendered text outfile with the addition of the extension `.in`.
+- Template files that are used to pipe rendered text data to the standard output stream do not have a specified source file path format.  Users may define any local or remote path when the `--stdout` option is used.  The addition of a `.in` extension to the desired render artifact file path for these template files is RECOMMENDED when file writes are performed with these streamed data.
+- All template token glyphs in the order and case-sensitive definition specified on the command line MUST be replaced with the replacement text. 
+- All template tokens contained in template files MUST be replaced with replacement text during each execution of the renderer.
+
+
+
+
 
