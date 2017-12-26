@@ -18,6 +18,9 @@ func TestRenderBuiltinLowercaseInkTagLocal(t *testing.T) {
 		{filepath.Join("..", "testfiles", "template_1.txt.in"), "abcd123", "sha=abcd123 test=abcd123"},
 		{filepath.Join("..", "testfiles", "template_1.txt.in"), "åß∂ƒç√∫", "sha=åß∂ƒç√∫ test=åß∂ƒç√∫"},
 		{filepath.Join("..", "testfiles", "template_1.txt.in"), "饂饂饂饂", "sha=饂饂饂饂 test=饂饂饂饂"},
+		{filepath.Join("..", "testfiles", "template_4.txt.in"), "abcd123", "饂饂饂=abcd123 åß∂=abcd123"},
+		{filepath.Join("..", "testfiles", "template_4.txt.in"), "åß∂ƒç√∫", "饂饂饂=åß∂ƒç√∫ åß∂=åß∂ƒç√∫"},
+		{filepath.Join("..", "testfiles", "template_4.txt.in"), "饂饂饂饂", "饂饂饂=饂饂饂饂 åß∂=饂饂饂饂"},
 	}
 
 	for _, testcase := range tests {
@@ -40,6 +43,9 @@ func TestRenderBuiltinUppercaseInkTagLocal(t *testing.T) {
 		{filepath.Join("..", "testfiles", "template_2.txt.in"), "abcd123", "sha=abcd123 test=abcd123"},
 		{filepath.Join("..", "testfiles", "template_2.txt.in"), "åß∂ƒç√∫", "sha=åß∂ƒç√∫ test=åß∂ƒç√∫"},
 		{filepath.Join("..", "testfiles", "template_2.txt.in"), "饂饂饂饂", "sha=饂饂饂饂 test=饂饂饂饂"},
+		{filepath.Join("..", "testfiles", "template_5.txt.in"), "abcd123", "饂饂饂=abcd123 åß∂=abcd123"},
+		{filepath.Join("..", "testfiles", "template_5.txt.in"), "åß∂ƒç√∫", "饂饂饂=åß∂ƒç√∫ åß∂=åß∂ƒç√∫"},
+		{filepath.Join("..", "testfiles", "template_5.txt.in"), "饂饂饂饂", "饂饂饂=饂饂饂饂 åß∂=饂饂饂饂"},
 	}
 
 	for _, testcase := range tests {
@@ -74,6 +80,9 @@ func TestRenderBuiltinLowercaseInkTagRemote(t *testing.T) {
 		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_1.txt.in", "abcd123", "sha=abcd123 test=abcd123"},
 		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_1.txt.in", "åß∂ƒç√∫", "sha=åß∂ƒç√∫ test=åß∂ƒç√∫"},
 		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_1.txt.in", "饂饂饂饂", "sha=饂饂饂饂 test=饂饂饂饂"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_4.txt.in", "abcd123", "饂饂饂=abcd123 åß∂=abcd123"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_4.txt.in", "åß∂ƒç√∫", "饂饂饂=åß∂ƒç√∫ åß∂=åß∂ƒç√∫"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_4.txt.in", "饂饂饂饂", "饂饂饂=饂饂饂饂 åß∂=饂饂饂饂"},
 	}
 
 	for _, testcase := range tests {
@@ -96,6 +105,9 @@ func TestRenderBuiltinUppercaseInkTagRemote(t *testing.T) {
 		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_2.txt.in", "abcd123", "sha=abcd123 test=abcd123"},
 		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_2.txt.in", "åß∂ƒç√∫", "sha=åß∂ƒç√∫ test=åß∂ƒç√∫"},
 		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_2.txt.in", "饂饂饂饂", "sha=饂饂饂饂 test=饂饂饂饂"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_5.txt.in", "abcd123", "饂饂饂=abcd123 åß∂=abcd123"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_5.txt.in", "åß∂ƒç√∫", "饂饂饂=åß∂ƒç√∫ åß∂=åß∂ƒç√∫"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_5.txt.in", "饂饂饂饂", "饂饂饂=饂饂饂饂 åß∂=饂饂饂饂"},
 	}
 
 	for _, testcase := range tests {
