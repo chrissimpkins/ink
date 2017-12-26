@@ -19,6 +19,9 @@ func TestRenderUserBracketsLocal(t *testing.T) {
 		{filepath.Join("..", "testfiles", "template_3.txt.in"), "abcd123", "sha=abcd123 test=abcd123", "[[user]]"},
 		{filepath.Join("..", "testfiles", "template_3.txt.in"), "åß∂ƒç√∫", "sha=åß∂ƒç√∫ test=åß∂ƒç√∫", "[[user]]"},
 		{filepath.Join("..", "testfiles", "template_3.txt.in"), "饂饂饂饂", "sha=饂饂饂饂 test=饂饂饂饂", "[[user]]"},
+		{filepath.Join("..", "testfiles", "template_6.txt.in"), "abcd123", "饂饂饂=abcd123 åß∂=abcd123", "[[ 饂饂 ]]"},
+		{filepath.Join("..", "testfiles", "template_6.txt.in"), "åß∂ƒç√∫", "饂饂饂=åß∂ƒç√∫ åß∂=åß∂ƒç√∫", "[[ 饂饂 ]]"},
+		{filepath.Join("..", "testfiles", "template_6.txt.in"), "饂饂饂饂", "饂饂饂=饂饂饂饂 åß∂=饂饂饂饂", "[[ 饂饂 ]]"},
 	}
 
 	for _, testcase := range tests {
@@ -55,6 +58,9 @@ func TestRenderUserBracketsRemote(t *testing.T) {
 		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_3.txt.in", "abcd123", "sha=abcd123 test=abcd123", "[[user]]"},
 		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_3.txt.in", "åß∂ƒç√∫", "sha=åß∂ƒç√∫ test=åß∂ƒç√∫", "[[user]]"},
 		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_3.txt.in", "饂饂饂饂", "sha=饂饂饂饂 test=饂饂饂饂", "[[user]]"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_6.txt.in", "abcd123", "饂饂饂=abcd123 åß∂=abcd123", "[[ 饂饂 ]]"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_6.txt.in", "åß∂ƒç√∫", "饂饂饂=åß∂ƒç√∫ åß∂=åß∂ƒç√∫", "[[ 饂饂 ]]"},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_6.txt.in", "饂饂饂饂", "饂饂饂=饂饂饂饂 åß∂=饂饂饂饂", "[[ 饂饂 ]]"},
 	}
 
 	for _, testcase := range tests {
