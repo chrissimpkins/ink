@@ -5,16 +5,22 @@
 
 # What is ink?
 
-ink is an open source stream editor and text file template renderer that is built with Go. The ink executable is compiled for use on [Linux, macOS, and Windows platforms](https://github.com/chrissimpkins/ink/releases/latest).  It was designed to provide a simple approach to get command line executable text data into pre-formatted text files.
+ink is an open source stream editor and text file template renderer. The `ink` executable is compiled from Go programming language source for use on [Linux, macOS, and Windows platforms](https://github.com/chrissimpkins/ink/releases/latest).  It was designed to provide a simple approach to get command line executable text data into pre-formatted text files.
 
 It features:
 
-- line filter stream editor support (pipe replacement text from other applications to ink, render your template with the standard input piped text, then pipe the rendered text to the standard output stream for file writes or further text processing)
-- support for parallel multi-file text replacements from local and remotely stored (GET request accessible) templates
-- a simple built-in text template format using `{{ ink }}` text labels
-- extremely flexible user defined text template formatting that supports *nearly any text replacement label*™ that you'd like to use.  This is defined at rendering time on the command line.
+- Unicode support
+- line filter style stream editor support (pipe replacement text from other applications to ink, render your template tokens with the standard input piped text, then pipe the rendered text to the standard output stream for further text processing or file writes)
+- local and remotely stored (GET request accessible) templates
+- parallel multi-template renders
+- a simple [built-in text template format](#ink-template-specification) using `{{ ink }}` tokens
+- an extremely flexible [user-defined text template format]((#user-defined-template-specification)) that supports *nearly any text replacement token*™ that you'd like to use.  These tokens are defined at rendering time on the command line
+- automated outfile path writes that are built in to the template file path specifications with the addition of a `.in` extension to the intended path
+- simple find/replace text substitutions that are defined on the command line with `--find` and `--replace` options
 
 ### Example
+
+The following example is the actual use case that prompted the development of ink for the Hack typeface build workflow.
 
 ##### CSS template file
 
@@ -183,15 +189,15 @@ or
 $ [executable command stdout replacement stream] | ink --find=[find string] [options] [template path 1]...[template path n]
 ```
 
-Remote text files can be streamed as the source text by replacing the template file paths with one or more GET request accessible URL as shown in the examples above.
+Remote text files can be streamed as the source text by replacing the template file paths with one or more GET request accessible URL as shown in the previous usage examples.
 
-You can create a pipeline from ink to additional applications (or define your own outfile path) by including the `--stdout` option in your command.
+You can create a pipeline from ink to additional applications (or define your own file write path) by including the `--stdout` option in your command.
 
-### Options
+### ink Options
 
 - `--find=` : find string value for user defined templates
 - `-h, --help` : application help
-- `--lint` : lint a template file for validity using the ink template file specification
+- `--lint` : lint a template file for validity using the template file specifications
 - `--replace=` : replacement string value for template renders
 - `--stdout` : write rendered text to standard output stream
 - `--trimnl` : trim newline value from replacement string (intended for use with data piped through stdin stream)
@@ -226,19 +232,28 @@ For example:
 $ ink --replace=abcd123 --stdout template.txt.in
 ```
 
-This will permit you to view the rendered text in your terminal or to pipe it to another application for further text processing.
+This will permit you to view the rendered text in your terminal, pipe it to another application for further text processing, or write the file to disk with a file path that you specify.
 
 Here is a Linux/macOS example of a pipeline to and from `ink` with a file write to the path `finalfile.txt` after further processing in the (fake) application `cooltxt`:
 
 ```
-$ echo "abcd123" | ink template.txt.in | cooltxt --dothings > finalfile.txt
+$ echo "abcd123" | ink --stdout template.txt.in | cooltxt --dothings > finalfile.txt
 ```
 
-### Replacement Text Modification Options
+### How to lint a template file
+
+Use the `--lint` option to confirm that a local or remote template file meets the [ink and user-defined template specifications](#template-file-specifications):
+
+```
+$ ink --lint template.txt.in
+$ ink --lint https://somesite.org/template.txt.in
+```
+
+### How to modify text in the replacement strings from other applications
 
 #### Trim newline characters from replacement strings
 
-Some command line executables include a newline character following the standard output text (including the echo executable examples above).  This is not always desirable in the replacement substring that is used in your template files.  To remove the newline character, include the `--trimnl` option in your command:
+Some command line executables include a newline character following the standard output text (including the `echo` executable that was used in examples above).  This is not always desirable in the replacement substring that is used in your template files.  To remove the newline character, include the `--trimnl` option in your command:
 
 ```
 $ echo "abcd123" | ink --trimnl template.txt.in
@@ -246,35 +261,66 @@ $ echo "abcd123" | ink --trimnl template.txt.in
  
 ## Template File Specifications
 
-"Template file" is defined as any local or remote text file that is used as the source for text substitutions by inclusion of text replacement "tokens" in the document.
+"Template" is defined as any local or remote text file that is used as the source for text substitutions by inclusion of text replacement "tokens".
 
-"Token" is defined as the set of glyphs, in user defined order, that are defined as intended for text substitution within "template files".
+"Token" is defined as the set of ordered, case-sensitive glyphs that are intended as a site for text substitution within "Templates".
 
-"Replacement text" is defined as the text intended for substitution at the site of a "token" in a template file.
+"Replacement Text" is defined as the text intended for substitution at the site of a "Token" in a "Template".
 
-"Outfile" is defined as a text file path that is the rendering artifact of the `ink` executable.  Note that this is intentionally distinct from a user specified file write during command line execution using shell idioms or other modalities.
+"Outfile" is defined as a text file path that is the rendering artifact of the `ink` executable.  Note that this is intentionally distinct from user implemented (e.g. operating system/shell specific shell idiom like `>`) approaches to file writes that are not performed by the ink executable.
 
 ### ink template specification
 
-The ink template file is specified as follows:
+The "ink template" is specified as follows:
 
-- Template files that are rendered to outfiles MUST be defined by a path that includes the intended file path of the outfile with the addition of the extension `.in`.
-- Template files that are used to pipe rendered text data to the standard output stream do not have a specified file path format.  Users may define any local or remote path when the `--stdout` option is used.  The addition of a `.in` extension to the desired render artifact file path for these template files is RECOMMENDED when file writes are performed with these streamed data.
-- The template MAY include zero or more template tokens that are defined in a case-sensitive manner as `{{ink}}` or `{{ ink }}`.
-- The template MAY include zero or more template tokens that are defined in a case-sensitive manner as `{{.Ink}}` or `{{ .Ink }}`.
-- All template token glyphs up to and including the initial `{` and final `}` glyphs MUST be replaced with replacement text during each execution of the renderer.
-- All template tokens contained in template files MUST be replaced with replacement text during each execution of the renderer.
+- Templates that are rendered to Outfiles MUST be defined by a path that includes the intended file path of the Outfile with the addition of the extension `.in`.
+- Templates that are used to pipe rendered text data to the standard output stream do not have a specified file path format.  Users may define any local or remote path when the `--stdout` option is used.  The addition of a `.in` extension to the desired render artifact file path for these Templates is RECOMMENDED when file writes are performed with these streamed data.
+- The Template MAY include zero or more Tokens that are defined in a case-sensitive manner as `{{ink}}` or `{{ ink }}`.
+- The Template MAY include zero or more Tokens that are defined in a case-sensitive manner as `{{.Ink}}` or `{{ .Ink }}`.
+- All Token glyphs up to and including the initial `{` and final `}` glyphs MUST be replaced with Replacement Text during each execution of the renderer.
+- All Template Tokens MUST be replaced with Replacement Text during each execution of the renderer.
+
+An example of a valid ink template is:
+
+```
+Email: {{ ink }}
+Date: January 1, 2000
+Subject: About things
+```
+
+An example of an invalid ink template is:
+
+```
+Email: {{ email }}
+Date: January 1, 2000
+Subject: About things
+```
 
 ### User-defined template specification
 
-User-defined templates are specified as follows:
+The "User-defined template" is specified as follows:
 
-- Templates files MUST NOT use two adjacent `{` glyphs as the opening delimiter and two adjacent `}` glyphs as the closing delimiter in template tokens.
-- Template files that are rendered to outfiles MUST be defined by a path that includes the intended file path of the rendered text outfile with the addition of the extension `.in`.
-- Template files that are used to pipe rendered text data to the standard output stream do not have a specified source file path format.  Users may define any local or remote path when the `--stdout` option is used.  The addition of a `.in` extension to the desired render artifact file path for these template files is RECOMMENDED when file writes are performed with these streamed data.
-- All template token glyphs in the order and case-sensitive definition specified on the command line MUST be replaced with the replacement text during each execution of the renderer. 
-- All template tokens contained in template files MUST be replaced with replacement text during each execution of the renderer.
+- Templates MUST NOT include two adjacent `{` glyphs, zero or more glyphs that are not `}`, followed by two adjacent `}` glyphs in the Template.  The `{{ token }}` formatting is a protected part of the ink template specification.
+- Templates that are rendered to Outfiles MUST be defined by a path that includes the intended file path of the rendered text outfile with the addition of the extension `.in`.
+- Templates that are used to pipe rendered text data to the standard output stream do not have a specified source file path format.  Users may define any local or remote path when the `--stdout` option is used.  The addition of a `.in` extension to the desired render artifact file path for these Templates is RECOMMENDED when file writes are performed with these streamed data.
+- All Token glyphs, in the order and case-sensitive definition specified on the command line, MUST be replaced with the Replacement Text during each execution of the renderer. 
+- All Template Tokens MUST be replaced with Replacement Text during each execution of the renderer.
 
+An example of a valid user-defined template is:
+
+```
+Email: [[ email ]]
+Date: %date%
+Subject: << SUBJECT >>
+```
+
+An example of an invalid user-defined template is:
+
+```
+Email: {{ .Email }}
+Date: {{ date }}
+Subject: {{ Subject }}
+```
 
 ## License
 
