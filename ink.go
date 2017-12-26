@@ -42,7 +42,7 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.6.3.dev4"
+	Version = "0.6.3"
 
 	// Usage is the application usage string
 	Usage = `Usage: ink [options] [template path 1]...[template path n]
@@ -67,7 +67,8 @@ const (
 		"     --stdout         Write render to standard output stream\n" +
 		"     --trimnl         Trim newline value from replacement string\n" +
 		"     --usage          Application usage\n" +
-		" -v, --version        Application version\n\n"
+		" -v, --version        Application version\n\n" +
+		"Full documentation and template specifications are available at https://github.com/chrissimpkins/ink\n"
 )
 
 var versionShort, versionLong, helpShort, helpLong, usageLong *bool
