@@ -42,7 +42,7 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.7.0"
+	Version = "0.7.1"
 
 	// Usage is the application usage string
 	Usage = `Usage: ink [options] [template path 1]...[template path n]
@@ -56,19 +56,19 @@ const (
 		" MIT License\n\n" +
 		" Source: https://github.com/chrissimpkins/ink\n" +
 		"=================================================\n\n" +
-		"ink is a fast, flexible stream editor and text template renderer that supports local and remote source text files.\n\n" +
+		"ink is a fast, flexible stream editor that supports local and remote source text file templating with built-in and user defined template tokens.\n\n" +
 		" Usage:\n" +
 		"  $ ink [options] [template path 1]...[template path n]\n" +
 		"  $ ink [options] [template URL 1 ]...[template URL n ]\n\n" +
 		" Options:\n" +
-		"     --find=          Find string literal/regex pattern for user defined tokens\n" +
-		" -h, --help           Application help\n" +
-		"     --lint           Lint template against the ink template file specification\n" +
-		"     --replace=       Replacement string literal value for text substitutions\n" +
-		"     --stdout         Write rendered text to standard output stream\n" +
-		"     --trimnl         Trim newline value from replacement string\n" +
-		"     --usage          Application usage\n" +
-		" -v, --version        Application version\n\n" +
+		"     --find=       String literal/regex pattern (re2) for user defined tokens\n" +
+		" -h, --help        Application help\n" +
+		"     --lint        Lint template against the ink template file specification\n" +
+		"     --replace=    Replacement string literal value for text substitutions\n" +
+		"     --stdout      Write rendered text to standard output stream\n" +
+		"     --trimnl      Trim newline value from replacement string\n" +
+		"     --usage       Application usage\n" +
+		" -v, --version     Application version\n\n" +
 		"Full documentation and template specifications are available at https://github.com/chrissimpkins/ink\n"
 )
 
