@@ -42,7 +42,7 @@ import (
 
 const (
 	// Version is the application version string
-	Version = "0.6.3"
+	Version = "0.7.0"
 
 	// Usage is the application usage string
 	Usage = `Usage: ink [options] [template path 1]...[template path n]
@@ -56,14 +56,15 @@ const (
 		" MIT License\n\n" +
 		" Source: https://github.com/chrissimpkins/ink\n" +
 		"=================================================\n\n" +
+		"ink is a fast, flexible stream editor and text template renderer that supports local and remote source text files.\n\n" +
 		" Usage:\n" +
 		"  $ ink [options] [template path 1]...[template path n]\n" +
 		"  $ ink [options] [template URL 1 ]...[template URL n ]\n\n" +
 		" Options:\n" +
-		"     --find=          Find string value for template render\n" +
+		"     --find=          Find string literal/regex pattern for text substitutions\n" +
 		" -h, --help           Application help\n" +
 		"     --lint           Lint ink template file\n" +
-		"     --replace=       Replacement string value for template render\n" +
+		"     --replace=       Replacement string literal value for text substitutions\n" +
 		"     --stdout         Write render to standard output stream\n" +
 		"     --trimnl         Trim newline value from replacement string\n" +
 		"     --usage          Application usage\n" +
@@ -240,7 +241,7 @@ func main() {
 			defer wg.Done()
 			err := renderLocal(templatePath, replaceString, stdOutFlag)
 			if err != nil {
-				os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render template %s to file. %v\n", templatePath, err))
+				os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render template %s. %v\n", templatePath, err))
 				errorc <- true // true = error occurred
 			}
 			errorc <- false                 // false = error did not occur
@@ -257,7 +258,7 @@ func main() {
 			defer wg.Done()
 			err := renderRemote(templateURL, replaceString, stdOutFlag)
 			if err != nil {
-				os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render remote template %s to file. %v\n", templateURL, err))
+				os.Stderr.WriteString(fmt.Sprintf("[ink] ERROR: Failed to render remote template %s. %v\n", templateURL, err))
 				errorc <- true // true = error occurred
 			}
 			errorc <- false
