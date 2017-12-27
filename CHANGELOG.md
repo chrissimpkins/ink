@@ -5,6 +5,7 @@
 - added regular expression substitution support to the `--find` option for local and remote source text files
 - added new command line regular expression syntax definition `--find="{{regex pattern}}"`
 - modified error messages in ink.go source file - removed render to file wording as not all renders are to files and this did not differentiate, was unnecessary language
+- updated in-application help string
 
 ### v0.6.3
 
