@@ -6,8 +6,8 @@ import (
 )
 
 // GetURLFilePath parses a Url string and returns the filepath at the final path position of the URL and error
-func GetURLFilePath(Url string) (string, error) {
-	u, err := url.Parse(Url)
+func GetURLFilePath(URL string) (string, error) {
+	u, err := url.Parse(URL)
 	if err != nil {
 		return "", err
 	}
