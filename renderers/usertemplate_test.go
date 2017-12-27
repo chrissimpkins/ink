@@ -106,6 +106,38 @@ func TestRenderUserBracketsRemote(t *testing.T) {
 	}
 }
 
+func TestRenderRegexRemote(t *testing.T) {
+	tests := []struct {
+		templatepath string
+		replacement  string
+		expected     string
+		find         string
+	}{
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_regex.txt.in", "one", "This is a template with a few numbers one one one", `{{\d+}}`},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_regex.txt.in", "åß∂", "This is a template with a few numbers åß∂ åß∂ åß∂", `{{\d+}}`},
+		{"https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_regex.txt.in", "饂饂饂", "This is a template with a few numbers 饂饂饂 饂饂饂 饂饂饂", `{{\d+}}`},
+	}
+
+	for _, testcase := range tests {
+		haystack, err := RenderFromRemoteUserTemplate(testcase.templatepath, &testcase.find, &testcase.replacement)
+		if err != nil {
+			t.Errorf("[FAIL] Execution returned unexpected error value: %v", err)
+		}
+		if *haystack != testcase.expected {
+			t.Errorf("[FAIL] Expected rendered template value = '%s' and received rendered template value '%s'", testcase.expected, *haystack)
+		}
+	}
+}
+
+func TestRenderRegexRemoteBadRegex(t *testing.T) {
+	replacestring := "testing"
+	findstring := "{{}}" // try to use the regex definition syntax without a regex pattern
+	_, err := RenderFromRemoteUserTemplate("https://raw.githubusercontent.com/chrissimpkins/ink/master/testfiles/template_regex.txt.in", &findstring, &replacestring)
+	if err == nil {
+		t.Errorf("[FAIL] Expected attempt to perform replacement with regular expression syntax that is missing a regex pattern to raise error; however, no error was raised")
+	}
+}
+
 func TestRenderUserBadURLRaisesError(t *testing.T) {
 	replacestring := "testing"
 	findstring := "[[user]]"
