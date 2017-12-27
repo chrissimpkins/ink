@@ -1,22 +1,22 @@
 # <img src="https://raw.githubusercontent.com/chrissimpkins/ink/images/img/ink-logo-crunch.png">
-### A fast, flexible stream editor and text template renderer
+### A fast, flexible stream editor
 
 [![Build Status](https://semaphoreci.com/api/v1/sourcefoundry/ink/branches/master/badge.svg)](https://semaphoreci.com/sourcefoundry/ink) [![Build status](https://ci.appveyor.com/api/projects/status/21si0rtxx9q36cad/branch/master?svg=true)](https://ci.appveyor.com/project/chrissimpkins/ink/branch/master) [![Go Report Card](https://goreportcard.com/badge/github.com/chrissimpkins/ink)](https://goreportcard.com/report/github.com/chrissimpkins/ink)
 
 # What is ink?
 
-ink is an open source stream editor and text file template renderer. The `ink` executable is compiled from Go programming language source for use on [Linux, macOS, and Windows platforms](https://github.com/chrissimpkins/ink/releases/latest).  It was designed to provide a simple approach to get command line executable text data into pre-formatted text files.
+ink is an open source stream editor that supports rendering of text replacements in pre-formatted text files (templates). The `ink` executable is compiled from Go programming language source for use on [Linux, macOS, and Windows platforms](https://github.com/chrissimpkins/ink/releases/latest).  It was designed to provide a simple approach to get command line executable text data into text templates.
 
 It features:
 
 - Unicode support
-- line filter style stream editor support (pipe replacement text from other applications to ink, render your template tokens with the standard input piped text, then pipe the rendered text to the standard output stream for further text processing or file writes)
-- local and remotely stored (GET request accessible) templates
+- line filter style stream editor support (pipe replacement text from another application to ink, render your template tokens with the piped standard input text, then pipe the rendered text to the standard output stream for further text processing or file writes)
+- local and remotely stored (GET request accessible) template support
 - parallel multi-template renders
 - a simple [built-in text template format](#ink-template-specification) using `{{ ink }}` tokens
-- an extremely flexible [user-defined text template format]((#user-defined-template-specification)) that supports *nearly any text replacement token*™ that you'd like to use.  These tokens are defined at rendering time on the command line
+- a flexible [user-defined text template format]((#user-defined-template-specification)) that supports *nearly any text replacement token*™ that you'd like to use.  These tokens are defined at rendering time on the command line
 - automated outfile path writes that are built in to the template file path specifications with the addition of a `.in` extension to the intended path
-- simple find/replace text substitutions that are defined on the command line with `--find` and `--replace` options
+- simple find/replace string literal and regular expression match substitutions that are defined on the command line with `--find` and `--replace` options
 
 ### Example
 
@@ -24,7 +24,7 @@ The following example is the actual use case that prompted the development of in
 
 ##### CSS template file
 
-The CSS template is available on the path `hack.css.in` in this example; however, it is possible to store the template file remotely on a server where it is accessible by GET request and use the URL in place of the local file path to accomplish the same local text file render as demonstrated in this example.
+The CSS template is available on the local file path `hack.css.in` in this example; however, it is possible to store the template file remotely on a server where it is accessible by GET request and use the URL in place of the local file path to accomplish the same local text file render as demonstrated in this example.
 
 ```css
 /*!
@@ -119,7 +119,7 @@ Download the latest compiled release file for your operating system and architec
 
 #### Linux / macOS
 
-Unpack the tar.gz archive and move the `ink` executable file to your `/usr/local/bin` directory by executing the following command in the root of the unpacked archive:
+Unpack the tar.gz archive and move the `ink` executable file to a directory on your system PATH (e.g. `/usr/local/bin`).  This can be performed by executing the following command in the root of the unpacked archive:
 
 ```
 $ mv ink /usr/local/bin/ink
@@ -144,6 +144,10 @@ $ go get github.com/chrissimpkins/ink
 ```
 
 ## Usage
+
+### Default Behavior
+
+The default behavior of `ink` is to render text replacements at `{{ ink }}` tokens in one or more local or remote template files with replacement text that is defined by the `--replace=` command line flag value or data piped in through the standard input stream.  By default, a file write of the rendered template text takes place on the same directory path as the template file for local templates and the current working directory for remote templates. The rendered file path is defined as the template file path with the `.in` extension removed.
 
 ### Syntax
 
@@ -175,30 +179,30 @@ or
 $ [executable command stdout stream] | ink [options] [template URL 1]...[template URL n]
 ```
 
-#### Stream editor text substitutions
+#### User-defined token substitutions
 
-The stream editor approach supports user-defined text replacement tokens in the source document. This permits you to define alternate template tokens in pre-formatted files and render template replacements as you would with template files that follow the ink template specification.  This approach also permits use of ink as a stream editor for routine find/replace text substitutions in the source document.
+`ink` supports user-defined text replacement tokens in the source document with the `--find=` command line option. This option permits you to define your own template token format and render text replacements as you would with template files that follow the ink template specification.  This approach also permits use of ink as a stream editor for routine find/replace text substitutions with string literal or regular expression pattern token matches in the source document.
 
 ```
-$ ink --find=[find string] --replace=[replacement string] [options] [template path 1]...[template path n]
+$ ink --find=[find string value or regular expression pattern] --replace=[replacement string] [options] [template path 1]...[template path n]
 ```
 
 or
 
 ```
-$ [executable command stdout replacement stream] | ink --find=[find string] [options] [template path 1]...[template path n]
+$ [executable command stdout replacement stream] | ink --find=[find string value or regular expression pattern] [options] [template path 1]...[template path n]
 ```
 
-Remote text files can be streamed as the source text by replacing the template file paths with one or more GET request accessible URL as shown in the previous usage examples.
+Remote files can be used as the source template text by replacing the local template file paths with one or more GET request accessible URL as shown in the previous usage examples.
 
-You can create a pipeline from ink to additional applications (or define your own file write path) by including the `--stdout` option in your command.
+Please see further details on the command line syntax for regular expression vs. string literal matching below.
 
 ### ink Options
 
-- `--find=` : find string value for user defined templates
+- `--find=` : find string literal value or regular expression pattern for user defined template tokens
 - `-h, --help` : application help
 - `--lint` : lint a template file for validity using the template file specifications
-- `--replace=` : replacement string value for template renders
+- `--replace=` : replacement string literal value for text substitutions
 - `--stdout` : write rendered text to standard output stream
 - `--trimnl` : trim newline value from replacement string (intended for use with data piped through stdin stream)
 - `--usage` : application usage
@@ -206,9 +210,9 @@ You can create a pipeline from ink to additional applications (or define your ow
 
 ### How to define a replacement string on the command line
 
-The replacement text for your template file can either be piped to `ink` through the standard input stream or you can include the `--replace=[replacement string]` option in the command.  These are mutually exclusive and one of the two approaches is mandatory with each command.
+The replacement text for your template file can either be piped to `ink` through the standard input stream or you can include the `--replace=[replacement string]` option in the command.  These are mutually exclusive and one of the approaches is mandatory with each command.
 
-The following examples demonstrate how to achieve replacements with the same constant string literal using each approach:
+The following examples demonstrate how to achieve replacements with the same string literal using each approach:
 
 ```
 $ echo "abcd123" | ink template.txt.in
@@ -221,6 +225,30 @@ and these examples demonstrate how to evaluate command line expressions and use 
 $ date | ink template.txt.in
 $ ink --replace="$(date)" template.txt.in
 ```
+
+### How to define a string literal token for text replacements
+
+By default, `ink` uses the syntax `{{ ink }}` to identify text replacement tokens in the template document.  You have the option to define your own replacement tokens with the `--find=` option. Define the string literal value with the `--find=` option like this:
+
+```
+$ ink --find="[[ date ]]" --replace="January 1, 2000" template.txt.in
+```
+
+The above command identifies sites in the template text that match the string value `[[ date ]]` and substitute the replacement text at these locations.
+
+Include double quotes around the string value if you include special shell characters.
+
+### How to define a regular expression pattern token for text replacements
+
+The `--find=` option also supports the use of regular expression patterns to identify text substitution tokens in the source text.  Use the definition syntax `{{regular expression pattern}}` to define the `--find=` request as a regular expression match substitution.  Do not include space characters between the opening and closing `{` and `}` delimiters unless you intend for these characters to be part of the regular expression pattern.  
+
+For example, to define the regular expression match pattern `\d+\s+` with the `--find=` option, use the following syntax:
+
+```
+$ ink --find="{{\d+\s+}}" --replace="five " template.txt.in
+```
+
+The opening `{{` and closing `}}` characters signify that the contents represent a regular expression pattern.  The `{{` and `}}` delimiters are not part of the regular expression pattern.
 
 ### How to pipe a rendered template to the standard output stream
 
