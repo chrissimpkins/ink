@@ -61,11 +61,11 @@ const (
 		"  $ ink [options] [template path 1]...[template path n]\n" +
 		"  $ ink [options] [template URL 1 ]...[template URL n ]\n\n" +
 		" Options:\n" +
-		"     --find=          Find string literal/regex pattern for text substitutions\n" +
+		"     --find=          Find string literal/regex pattern for user defined tokens\n" +
 		" -h, --help           Application help\n" +
-		"     --lint           Lint ink template file\n" +
+		"     --lint           Lint template against the ink template file specification\n" +
 		"     --replace=       Replacement string literal value for text substitutions\n" +
-		"     --stdout         Write render to standard output stream\n" +
+		"     --stdout         Write rendered text to standard output stream\n" +
 		"     --trimnl         Trim newline value from replacement string\n" +
 		"     --usage          Application usage\n" +
 		" -v, --version        Application version\n\n" +
