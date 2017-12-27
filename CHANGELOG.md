@@ -1,5 +1,17 @@
 ## Changelog
 
+### v0.7.0
+
+- added regular expression substitution support to the `--find` option for local and remote source text files
+- added new command line regular expression syntax definition `--find="{{regex pattern}}"`
+- modified error messages in ink.go source file - removed render to file wording as not all renders are to files and this did not differentiate, was unnecessary language
+
+### v0.6.3
+
+- added ink template tests for expanded Unicode characters
+- added user-defined template tests for expanded Unicode characters
+- updated documentation for usage, available options, template specifications
+
 ### v0.6.2
 
 - added appveyor.yml settings file
