@@ -98,10 +98,9 @@ func renderUserTemplate(templateText *string, findString *string, replaceString 
 			}
 			regexOutString := userRegEx.ReplaceAllString(*templateText, *replaceString) // perform regex pattern matched replacements with the replacement string
 			return &regexOutString, nil
-		} else {
-			regexMatchError := fmt.Errorf("failed to match a valid regular expression string with the {{regex}} syntax in the command")
-			return &emptystring, regexMatchError
 		}
+		regexMatchError := fmt.Errorf("failed to match a valid regular expression string with the {{regex}} syntax in the command")
+		return &emptystring, regexMatchError
 	}
 
 	// replace all instances of user specified template findString with user specified replaceString
