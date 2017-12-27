@@ -1,5 +1,11 @@
 ## Changelog
 
+### v0.7.1
+
+- minor refactor of function parameter in `GetURLFilePath` of utilities/url.go source file
+- minor refactor of if block in `renderUserTemplate` function of renderers/usertemplates.go source file
+- minor in-application help text revisions
+
 ### v0.7.0
 
 - added regular expression substitution support to the `--find` option for local and remote source text files
