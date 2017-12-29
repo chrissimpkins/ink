@@ -9,7 +9,7 @@ ink is an open source stream editor that supports rendering of text replacements
 
 It features:
 
-- Unicode support
+- UTF-8 support in template text, tokens, replacement text
 - line filter style stream editor support with a twist (pipe replacement text from another application to ink, render your template tokens with the piped standard input text, then pipe the rendered text to the standard output stream for further text processing or file writes)
 - local and remotely stored (GET request accessible) template support
 - parallel multi-template renders
