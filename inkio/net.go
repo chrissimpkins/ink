@@ -25,7 +25,7 @@ func GetRequest(templateURL string) (string, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return emptystring, fmt.Errorf("%s returned a non-200 response status code value %d", templateURL, resp.StatusCode)
+		return emptystring, fmt.Errorf("%s returned a non-200 response status: %s", templateURL, resp.Status)
 	}
 
 	body, _ := ioutil.ReadAll(resp.Body)
