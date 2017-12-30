@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.7.2
+
+- included GET response status code and status message for all non-200 responses on remote template requests
+
 ### v0.7.1
 
 - minor refactor of function parameter in `GetURLFilePath` of utilities/url.go source file
